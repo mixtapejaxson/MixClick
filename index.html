@@ -5,58 +5,12 @@
     <script src="anticheat.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clicker Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="save.js"></script>
 </head>
 <body>
     <!-- ... existing code ... -->
     <div class="container"></div>
-    <style>
-        body {
-            font-family: Ubuntu, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #222;
-            color: #ddd;
-        }
-
-        .container {
-            text-align: center;
-        }
-
-        .counter {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-
-        .clicker {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 20px;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .clicker:hover {
-            transform: translateY(-5px);
-        }
-
-        .message {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: #ff0000;
-            color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -66,45 +20,8 @@
         <button class="clicker" id="upgradeBtn">Buy Upgrader (Cost: 10)</button><br><br>
         <div class="container">
             <button class="clicker" id="luckyBtn">I'm Feeling Lucky</button><br><br>
-            <script>
-                const luckyBtn = document.getElementById('luckyBtn');
-    
-                luckyBtn.addEventListener('click', () => {
-                    let gamble = Math.random();
-                    if (gamble < 0.25) {
-                        count += 100;
-                        counterEl.textContent = count;
-                        messageEl.style.display = 'block';
-                        messageEl.textContent = 'You won 100 points!';
-                    } else if (gamble < 0.5) {
-                        count -= 5000;
-                        if (count < 0) count = 0;
-                        counterEl.textContent = count;
-                        messageEl.style.display = 'block';
-                        messageEl.textContent = 'You lost 5000 points!';
-                    } else if (gamble < 0.75) {
-                        count += 500;
-                        counterEl.textContent = count;
-                        messageEl.style.display = 'block';
-                        messageEl.textContent = 'Jackpot! You won 500 points!';
-                    } else if (gamble += 1000000)
-                    {
-                        
-                        count += 1000000;
-                        counterEl.textContent = count;
-                        messageEl.style.display = 'block';
-                        messageEl.textContent = 'JACKPOT: You won 1,000,000 points!';
-                    } else {
-                        count = 0;
-                        counterEl.textContent = count;
-                        messageEl.style.display = 'block';
-                        messageEl.textContent = 'Bad luck! You lost all points!';
-                    }
-                    setTimeout(() => {
-                        messageEl.style.display = 'none';
-                    }, 2000);
-                });
-            </script>
+            <script src="gambling.js"></script>
+
         <button class="clicker" id="loadBtn" onclick="loadProgress()">Load Game</button><br><br>
         <button class="clicker" id="saveBtn" onclick="saveProgress()">Save Game</button><br><br>
         <button class="clicker" id="resetBtn" onclick="confirmReset()">Reset Game</button><br>

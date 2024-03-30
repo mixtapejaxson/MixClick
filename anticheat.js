@@ -4,9 +4,9 @@
 });
 
 // Prevent key events
-document.addEventListener('keydown', function(event) {
-    event.preventDefault();
-});
+//document.addEventListener('keydown', function(event) {
+//    event.preventDefault();
+//});
 // Anti-autoclicker
 let lastClickTime = 0;
 document.addEventListener('click', function(event) {
