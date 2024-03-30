@@ -29,9 +29,9 @@
         // Modify Save Progress to show auto save message
         function saveProgress() {
             const progress = {
-            money: count,
-            upgradeLevel: upgradeLevel,
-            upgradeCost: upgradeCost
+                money: count,
+                upgradeLevel: upgradeLevel,
+                upgradeCost: upgradeCost
             };
 
             const serializedProgress = JSON.stringify(progress);
@@ -40,6 +40,44 @@
             localStorage.setItem('progress', encodedProgress);
 
             showMessage("Progress auto saved successfully!", 'green');
+        }
+
+        // Reset Progress
+        function resetProgress() {
+            // Reset game variables
+            count = 0;
+            upgradeLevel = 0;
+            upgradeCost = 10;
+
+            // Update UI
+            counterEl.textContent = count;
+            upgradeBtn.textContent = `Buy Upgrader (Cost: ${upgradeCost})`;
+
+            // Save the reset progress
+            saveProgress();
+
+            showMessage("Progress reset and saved successfully!", 'red');
+        }
+
+        // Load Progress
+        function loadProgress() {
+            const encodedProgress = localStorage.getItem('progress');
+
+            if (encodedProgress) {
+                const decodedProgress = base64Decode(encodedProgress);
+                const progress = JSON.parse(decodedProgress);
+
+                count = progress.money;
+                upgradeLevel = progress.upgradeLevel;
+                upgradeCost = progress.upgradeCost;
+
+                counterEl.textContent = count;
+                upgradeBtn.textContent = `Buy Upgrader (Cost: ${upgradeCost})`;
+
+                showMessage("Progress loaded successfully!");
+            } else {
+                showMessage("No saved progress found!");
+            }
         }
         // Save Progress
         function saveProgress() {

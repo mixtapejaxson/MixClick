@@ -18,9 +18,7 @@ luckyBtn.addEventListener('click', () => {
         counterEl.textContent = count;
         messageEl.style.display = 'block';
         messageEl.textContent = 'Jackpot! You won 500 points!';
-    } else if (gamble += 1000000)
-    {
-        
+    } else if (gamble += 1000000) {
         count += 1000000;
         counterEl.textContent = count;
         messageEl.style.display = 'block';
@@ -31,7 +29,4 @@ luckyBtn.addEventListener('click', () => {
         messageEl.style.display = 'block';
         messageEl.textContent = 'Bad luck! You lost all points!';
     }
-    setTimeout(() => {
-        messageEl.style.display = 'none';
-    }, 2000);
 });
