@@ -9,7 +9,9 @@ body {
     background-color: #222;
     color: #ddd;
 }
-
+button {
+    cursor: pointer;
+}
 .container {
     text-align: center;
 }
