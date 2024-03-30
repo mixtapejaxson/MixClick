@@ -7,7 +7,40 @@
         function base64Decode(encodedStr) {
             return atob(encodedStr);
         }
+        // Auto Save Progress
+        setInterval(saveProgress, 30000);
 
+        // Show Message
+        function showMessage(message, color = 'black') {
+            const messageEl = document.createElement('div');
+            messageEl.style.position = 'absolute';
+            messageEl.style.top = '0';
+            messageEl.style.left = '0';
+            messageEl.style.color = color;
+            messageEl.textContent = message;
+
+            document.body.appendChild(messageEl);
+
+            setTimeout(() => {
+            document.body.removeChild(messageEl);
+            }, 3000);
+        }
+
+        // Modify Save Progress to show auto save message
+        function saveProgress() {
+            const progress = {
+            money: count,
+            upgradeLevel: upgradeLevel,
+            upgradeCost: upgradeCost
+            };
+
+            const serializedProgress = JSON.stringify(progress);
+            const encodedProgress = base64Encode(serializedProgress);
+
+            localStorage.setItem('progress', encodedProgress);
+
+            showMessage("Progress auto saved successfully!", 'green');
+        }
         // Save Progress
         function saveProgress() {
             const progress = {
@@ -22,6 +55,21 @@
             localStorage.setItem('progress', encodedProgress);
 
             showMessage("Progress saved successfully!");
+        // Reset Progress
+        function resetProgress() {
+            // Reset game variables
+            count = 0;
+            upgradeLevel = 0;
+            upgradeCost = 10;
+
+            // Update UI
+            counterEl.textContent = count;
+            upgradeBtn.textContent = `Buy Upgrader (Cost: ${upgradeCost})`;
+
+            // Save the reset progress
+            saveProgress();
+
+            showMessage("Progress reset and saved successfully!", 'red');
         }
 
         // Load Progress
@@ -43,4 +91,5 @@
             } else {
                 showMessage("No saved progress found!");
             }
+            } 
         }
