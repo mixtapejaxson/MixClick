@@ -29,12 +29,13 @@ function initClickerGame() {
         messageEl.textContent = 'Jackpot! You won 500 points!';
       } else if (gamble >= 0.75 && gamble < 0.999999) {
         count += 1000000;
+        counterEl.textContent = count; // Update counter before displaying jackpot message
         messageEl.textContent = 'JACKPOT: You won 1,000,000 points!';
       } else {
         count = 0;
         messageEl.textContent = 'Bad luck! You lost all points!';
       }
-  
+      
       // Update counter element after updating count
       counterEl.textContent = count;
       messageEl.style.display = 'block';
