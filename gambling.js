@@ -46,6 +46,6 @@ function initClickerGame() {
         messageEl.style.display = 'none'; // Hide the message after cooldown ends
       }, 30000); // 30 seconds cooldown
     });
-  }
-  
-  window.onload = initClickerGame;
+}
+
+window.onload = initClickerGame;
