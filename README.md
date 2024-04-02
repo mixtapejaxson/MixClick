@@ -16,4 +16,4 @@ THIS IS THE BEST GAME EVER
 - [ ] Add an actual shop
 - [ ] Add leaderboard (local leaderboard)
 - [ ] Add prefrences option
-- [ ] Add more than one save option
+- [ ] Add more than one save slot
