@@ -2,7 +2,11 @@
 ```console
 THIS IS THE BEST GAME EVER
 ```
-It is remastered and so much better
+**It is remastered and so much better**
+# Credits
+```console
+@RobloxEnderman
+```
 # Todo
 - [x] Add a nice UI
 - [x] Add a "gambling" option
@@ -12,4 +16,4 @@ It is remastered and so much better
 - [ ] Add an actual shop
 - [ ] Add leaderboard (local leaderboard)
 - [ ] Add prefrences option
-- [ ] 
+- [ ] Add more than one save option
