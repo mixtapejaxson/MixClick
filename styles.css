@@ -6,7 +6,8 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #222;
+    /* background-color: #222; */
+    background-image: radial-gradient(circle, darkblue, purple);
     color: #ddd;
 }
 button {
@@ -25,7 +26,7 @@ button {
     padding: 15px 30px;
     border: none;
     border-radius: 20px;
-    background-color: #007bff;
+    background: linear-gradient(to right, purple, #ff6600);
     color: #fff;
     font-size: 1.2em;
     cursor: pointer;
