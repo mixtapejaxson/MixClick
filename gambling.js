@@ -1,55 +1,59 @@
 function initClickerGame() {
-    // Obtain references to counter, button, and message elements
-    const counterEl = document.getElementById('counter');
-    const luckyBtn = document.getElementById('luckyBtn');
-    const messageEl = document.getElementById('message');
-  
-    let count = 0;
-    let isCooldown = false;
-  
-    luckyBtn.addEventListener('click', () => {
-      if (isCooldown) {
-        messageEl.textContent = 'Cooldown in effect. Please wait 30 seconds.';
-        messageEl.style.display = 'block';
-        return;
-      }
-  
-      const gamble = Math.random();
-  
-      // Update count first
-      if (gamble < 0.25) {
-        count += 100;
-        messageEl.textContent = 'You won 100 points!';
-      } else if (gamble < 0.5) {
-        count -= 5000;
-        if (count < 0) count = 0;
-        messageEl.textContent = 'You lost 5000 points!';
-      } else if (gamble < 0.75) {
-        count += 500;
-        messageEl.textContent = 'Jackpot! You won 500 points!';
-      } else if (gamble < 2.999999) {
-        count += 1000000;
-        counterEl.textContent = count; // Update counter before displaying jackpot message
-        messageEl.textContent = 'JACKPOT: You won 1,000,000 points!';
-      } else if (gamble >= 9.999999) {
-        count -= 50000000;
-        messageEl.textContent = 'Bad luck! 50 million points lost!';
+  // Obtain references to counter, button, and message elements
+  const counterEl = document.getElementById('counter');
+  const luckyBtn = document.getElementById('luckyBtn');
+  const messageEl = document.getElementById('message');
+  let isCooldown = false;
+
+  luckyBtn.addEventListener('click', () => {
+    if (isCooldown) {
+      messageEl.textContent = 'Cooldown in effect. Please wait 30 seconds.';
+      messageEl.style.display = 'block';
+      return;
+    }
+
+    const gamble = Math.random();
+    let points = parseInt(counterEl.textContent) || 0; // Retrieve current points and convert to integer
+
+    if (points < 100) {
+      messageEl.textContent = 'You need at least 100 points to gamble.';
+    } else {
+      if (gamble < 0.4) {
+        const pointsWon = Math.floor(points / 2);
+        points += pointsWon;
+        counterEl.textContent = points;
+        messageEl.textContent = `You won ${pointsWon} points!`;
+      } else if (gamble >= 0.4 && gamble < 0.7) {
+        const pointsLost = Math.floor(points / 3);
+        if (pointsLost >= points) {
+          points = 0;
+          counterEl.textContent = points;
+          messageEl.textContent = 'You lost all your points!';
+        } else {
+          points -= pointsLost;
+          counterEl.textContent = points;
+          messageEl.textContent = `You lost ${pointsLost} points!`;
+        }
+      } else if (gamble >= 0.7 && gamble < 0.9) {
+        points *= 2;
+        counterEl.textContent = points;
+        messageEl.textContent = `Congratulations! Your points have been doubled!`;
       } else {
-        count = 0;
+        points = 0;
+        counterEl.textContent = points;
         messageEl.textContent = 'Bad luck! You lost all points!';
       }
-      
-      // Update counter element after updating count
-      counterEl.textContent = count;
-      messageEl.style.display = 'block';
+    }
+    count = points;
   
-      isCooldown = true;
-  
-      setTimeout(() => {
-        isCooldown = false;
-        messageEl.style.display = 'none'; // Hide the message after cooldown ends
-      }, 30000); // 30 seconds cooldown
-    });
+    messageEl.style.display = 'block';
+    isCooldown = true;
+
+    setTimeout(() => {
+      isCooldown = false;
+      messageEl.style.display = 'none';
+    }, 30000); // 30 seconds cooldown
+  });
 }
 
 window.onload = initClickerGame;
