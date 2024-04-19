@@ -1,5 +1,5 @@
 function initClickerGame() {
-  // Obtain references to counter, button, and message elements
+  // Obtain references to counter, button, and message elements.
   const counterEl = document.getElementById('counter');
   const luckyBtn = document.getElementById('luckyBtn');
   const messageEl = document.getElementById('message');
