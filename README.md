@@ -9,11 +9,12 @@ THIS IS THE BEST GAME EVER
 ```
 # Todo
 - [x] Add a nice UI
-- [x] Add a "gambling" option
 - [x] Add saving
 - [x] Add Autosaving 
 - [x] Add anitcheat
 - [ ] Add an actual shop
-- [ ] Add leaderboard (local leaderboard)
+- [ ] Add powerups from the shop
 - [ ] Add prefrences option
 - [ ] Add more than one save slot
+- [ ] Add more advanced gambling logic
+- [ ] Change scoreing logic to allow for slower progression
