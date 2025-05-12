@@ -102,14 +102,28 @@
         
         // Called by shop.js after it changes playerPoints (e.g. purchase)
         window.updatePlayerPointsFromShop = function(newPointsValue) {
+            console.log('updatePlayerPointsFromShop called with:', newPointsValue);
             playerPoints = parseInt(newPointsValue) || 0;
-            if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
+            // Ensure the display element exists before updating
+            if (playerPointsDisplayEl) {
+                playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
+                console.log('Player points display updated to:', playerPoints);
+            } else {
+                console.error('playerPointsDisplayEl not found!');
+            }
         };
 
         // Called by shop.js after it changes playerCash (e.g. conversion)
         window.updatePlayerCashFromShop = function(newCashValue) {
+            console.log('updatePlayerCashFromShop called with:', newCashValue);
             playerCash = parseInt(newCashValue) || 0;
-            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+             // Ensure the display element exists before updating
+            if (playerCashDisplayEl) {
+                playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+                 console.log('Player cash display updated to:', playerCash);
+            } else {
+                console.error('playerCashDisplayEl not found!');
+            }
         };
 
         function closeShopModal() {
