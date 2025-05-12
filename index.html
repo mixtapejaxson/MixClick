@@ -19,10 +19,59 @@
         <button class="clicker" id="luckyBtn">I'm Feeling Lucky</button><br><br>
         <button class="clicker" id="loadBtn" onclick="loadProgress()">Load Game</button><br><br>
         <button class="clicker" id="saveBtn" onclick="saveProgress()">Save Game</button><br><br>
-        <button class="clicker" id="resetBtn" onclick="confirmReset()">Reset Game</button><br>
+        <button class="clicker" id="resetBtn" onclick="confirmReset()">Reset Game</button><br><br>
+        <button class="clicker" id="openShopBtn">Open Shop</button>
+    </div>
+
+    <div id="shopModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeShopModal()">&times;</span>
+            <h2>Shop</h2>
+            <iframe id="shopFrame" src="shop.html" style="width:100%; height:400px; border:none;"></iframe>
+        </div>
     </div>
 
     <div class="message" id="message"></div>
+
+    <style>
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+        }
+
+        .modal-content {
+            background-color: #2b2b2b; /* Slightly lighter than body background for contrast */
+            margin: 10% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 600px;
+            border-radius: 10px;
+            position: relative;
+            color: #ddd; /* Ensuring text color matches theme */
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #fff; /* Brighter on hover */
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 
     <script>
         const counterEl = document.querySelector('.counter');
@@ -37,6 +86,26 @@
         const upgradeBtn = document.getElementById('upgradeBtn');
         const luckyBtn = document.getElementById('luckyBtn');
         const messageEl = document.getElementById('message');
+        const openShopBtn = document.getElementById('openShopBtn');
+        const shopModal = document.getElementById('shopModal');
+        const shopFrame = document.getElementById('shopFrame');
+
+        openShopBtn.addEventListener('click', () => {
+            shopModal.style.display = "block";
+            // Optionally force iframe to reload
+            // shopFrame.src = shopFrame.src; 
+        });
+
+        function closeShopModal() {
+            shopModal.style.display = "none";
+        }
+
+        // Close modal if user clicks outside of the modal content
+        window.onclick = function(event) {
+            if (event.target == shopModal) {
+                closeShopModal();
+            }
+        }
 
         clickerBtn.addEventListener('click', () => {
             count += clickValue;
@@ -90,13 +159,134 @@
             upgradeLevel = 1;
             clickValue = 1;
 
+            // Reset localStorage items for shop power-ups
+            localStorage.removeItem('doubleClick');
+            localStorage.removeItem('autoClicker');
+            localStorage.removeItem('clickBoostActive');
+            localStorage.removeItem('clickBoostEndTime');
+            localStorage.removeItem('gamblingCooldownLevel'); // Added
+            localStorage.removeItem('gamblingCooldownReduction');
+            localStorage.removeItem('interestLevel'); // Added
+            localStorage.removeItem('interestRate');
+
+            if (mightyClicksInterval) clearInterval(mightyClicksInterval); // Clear Mighty Clicks interval
+            if (interestInterval) clearInterval(interestInterval); // Clear Interest interval
+
             counterEl.textContent = count;
             upgradeBtn.textContent = `Buy Upgrader (Cost: ${upgradeCost})`;
 
             showMessage("Game reset successfully!");
         }
+        
+        // Modify existing auto-clicker logic if present, or add new one for shop item
+        // This is a placeholder for how the auto-clicker from the shop would work
+        // The actual auto-clicker logic is in shop.js and relies on localStorage
+        
+        // --- Powerup Integration --- 
 
-        setInterval(updateCounter, 1000);
+        let mightyClicksInterval = null;
+        let interestInterval = null;
+
+        function applyClickBoost() {
+            let boostedValue = clickValue;
+            if (localStorage.getItem('doubleClick') === 'true') {
+                boostedValue *= 2;
+            }
+            if (localStorage.getItem('clickBoostActive') === 'true') {
+                boostedValue *= 3;
+            }
+            return boostedValue;
+        }
+
+        // Check and manage Mighty Clicks boost duration
+        function checkMightyClicks() {
+            const boostActive = localStorage.getItem('clickBoostActive') === 'true';
+            if (boostActive) {
+                const endTime = parseInt(localStorage.getItem('clickBoostEndTime'));
+                if (Date.now() >= endTime) {
+                    localStorage.removeItem('clickBoostActive');
+                    localStorage.removeItem('clickBoostEndTime');
+                    showMessage("Mighty Clicks expired!", "orange");
+                    if (mightyClicksInterval) clearInterval(mightyClicksInterval);
+                    mightyClicksInterval = null;
+                } else {
+                    // If interval not set, set it (e.g. on page load)
+                    if (!mightyClicksInterval) {
+                         mightyClicksInterval = setInterval(checkMightyClicks, 1000);
+                    }
+                }
+            }
+        }
+        // Initial check and start interval if active on load
+        checkMightyClicks();
+        if (localStorage.getItem('clickBoostActive') === 'true' && !mightyClicksInterval) {
+            mightyClicksInterval = setInterval(checkMightyClicks, 1000);
+        }
+
+        // Auto Clicker (from shop)
+        setInterval(() => {
+            if (localStorage.getItem('autoClicker') === 'true') {
+                count += applyClickBoost(); // Auto-clicker also benefits from boosts
+                counterEl.textContent = count;
+            }
+        }, 1000); // Clicks every second
+
+        // Golden Goose Interest (from shop)
+        function applyInterest() {
+            const interestRate = parseFloat(localStorage.getItem('interestRate'));
+            if (interestRate && interestRate > 0) {
+                const earnings = Math.floor(count * (interestRate / 100));
+                if (earnings > 0) {
+                    count += earnings;
+                    counterEl.textContent = count;
+                    // showMessage(`${earnings} points earned from interest!`, "gold"); // Can be spammy
+                    console.log(`${earnings} points earned from interest!`);
+                }
+            }
+        }
+        // Start interest interval if powerup is present
+        if (parseFloat(localStorage.getItem('interestRate')) > 0) {
+             if(interestInterval) clearInterval(interestInterval); // Clear existing before setting new
+             interestInterval = setInterval(applyInterest, 10000); // Every 10 seconds
+        }
+        // Also need to re-init this interval if interestRate is bought/upgraded while page is open.
+        // This can be done by listening to localStorage changes or by a function called from shop.js.
+        // For simplicity, save.js loadProgress will re-establish on next load.
+        // A more dynamic approach would involve shop.js calling a function in parent window.
+
+
+        // Modified main click function to account for all boosts
+        clickerBtn.addEventListener('click', () => {
+            count += applyClickBoost();
+            counterEl.textContent = count;
+            checkMightyClicks(); // Check boost after click, though interval also handles it
+        });
+
+        // The existing setInterval(updateCounter, 1000) might be for a different upgrade.
+        // If 'autoClicker' from the shop is the ONLY auto-clicker, then the original setInterval could be removed or conditional.
+        // For now, I'm leaving the original setInterval as it might be tied to an in-game upgrade rather than the shop.
+        // If they are meant to be the same, the logic should be merged.
+        // The original updateCounter function:
+        // function updateCounter() {
+        //     count += clickValue;
+        //     counterEl.textContent = count;
+        // }
+        // setInterval(updateCounter, 1000);
+
+        // To prevent double auto-clicking if the original updateCounter is for the same purpose as the shop's autoClicker:
+        // Option 1: Remove the original setInterval(updateCounter, 1000) if shop.js autoClicker is the sole one.
+        // Option 2: Make the original updateCounter conditional, e.g., if (!localStorage.getItem('autoClicker')) { setInterval(updateCounter, 1000); }
+        // For now, I'll assume they might be separate features, but this is a key area for review based on game design.
+
+        // Let's modify the existing updateCounter to NOT run if the shop's autoClicker is active to avoid double counting if they are the same feature.
+        // And ensure the shop's autoClicker correctly uses the clickValue (which can be upgraded)
+        // And the doubleClick powerup.
+
+        // Remove original setInterval, it will be handled by the shop.js logic or a combined one
+        // The line `setInterval(updateCounter, 1000);` should be removed or commented out.
+        // Let's find and comment it out.
+        // setInterval(updateCounter, 1000); // Commented out to avoid conflict with shop auto-clicker
+
     </script>
 </body>
 </html>

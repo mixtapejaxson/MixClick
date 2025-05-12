@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shop</title>
+    <link rel="stylesheet" href="shop.css">
+</head>
+<body>
+    <div class="shop-container">
+        <h1>Shop</h1>
+        <ul class="powerup-list">\n            <li class="powerup-item">
+                <h3>Double Click Power</h3>
+                <p>Doubles the amount of points you get per click.</p>
+                <button class="powerup-button" onclick="buyPowerup('doubleClick')">Buy (100 points)</button>
+            </li>
+            <li class="powerup-item">
+                <h3>Auto Clicker</h3>
+                <p>Automatically clicks every second. (Effect stacks with click value upgrades)</p>
+                <button class="powerup-button" id="buyAutoClicker" onclick="buyPowerup('autoClicker')">Buy (500 points)</button>
+            </li>
+            <li class="powerup-item">
+                <h3>Mighty Clicks (30s)</h3>
+                <p>Triples your click power for 30 seconds. Re-buying resets the timer.</p>
+                <button class="powerup-button" id="buyClickBoost" onclick="buyPowerup('clickBoost')">Buy (250 points)</button>
+            </li>
+            <li class="powerup-item">
+                <h3>Lucky Charm</h3>
+                <p>Permanently reduces the 'I'm Feeling Lucky' cooldown by 5 seconds. Max 2.</p>
+                <button class="powerup-button" id="buyGamblingCooldown" onclick="buyPowerup('gamblingCooldownReduction')">Buy (Cost: <span id="gamblingCooldownCost">1000</span> points)</button>
+            </li>
+            <li class="powerup-item">
+                <h3>Golden Goose</h3>
+                <p>Passively earn a percentage of your current score every 10 seconds. Max 1%.</p>
+                <button class="powerup-button" id="buyInterest" onclick="buyPowerup('interest')">Upgrade (Cost: <span id="interestCost">5000</span> points) - Current: <span id="interestRateDisplay">0</span>%</button>
+            </li>
+        </ul>
+    </div>
+    <script src="shop.js"></script>
+</body>
+</html>
