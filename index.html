@@ -12,15 +12,15 @@
 <body>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <div class="container">
-        <h1 id="counter" class="counter">0</h1>
+        <h1 id="playerCashDisplay" class="counter" style="color: #FFD700; margin-bottom: 0px;">Cash: 0</h1> <!-- Swapped: Top, Orange, H1 -->
+        <h2 id="playerPointsDisplay" class="counter" style="color: #FFFFFF; font-size: 2.5em; margin-top: 0px;">Points: 0</h2> <!-- Swapped: Bottom, White, H2 -->
         <br>
         <button class="clicker" id="clickerBtn">Click Me!</button><br><br>
-        <button class="clicker" id="upgradeBtn">Buy Upgrader (Cost: 10)</button><br><br>
+        <button class="clicker" id="openShopBtn">Open Shop</button><br><br>
         <button class="clicker" id="luckyBtn">I'm Feeling Lucky</button><br><br>
         <button class="clicker" id="loadBtn" onclick="loadProgress()">Load Game</button><br><br>
         <button class="clicker" id="saveBtn" onclick="saveProgress()">Save Game</button><br><br>
         <button class="clicker" id="resetBtn" onclick="confirmReset()">Reset Game</button><br><br>
-        <button class="clicker" id="openShopBtn">Open Shop</button>
     </div>
 
     <div id="shopModal" class="modal">
@@ -74,67 +74,80 @@
     </style>
 
     <script>
-        const counterEl = document.querySelector('.counter');
-        let count = 0;
-        let clickValue = 1;
-        let upgradeCost = 10;
-        let upgradeMultiplier = 2;
-        let upgradeLevel = 1;
-        let isCooldown = false;
-
+        // DOM Elements
+        const playerCashDisplayEl = document.getElementById('playerCashDisplay'); // Was clicksDisplayEl
+        const playerPointsDisplayEl = document.getElementById('playerPointsDisplay'); // Was cashDisplayEl
         const clickerBtn = document.getElementById('clickerBtn');
-        const upgradeBtn = document.getElementById('upgradeBtn');
+        // convertClicksBtn removed
         const luckyBtn = document.getElementById('luckyBtn');
         const messageEl = document.getElementById('message');
         const openShopBtn = document.getElementById('openShopBtn');
         const shopModal = document.getElementById('shopModal');
         const shopFrame = document.getElementById('shopFrame');
 
+        // Game Variables (will be loaded by save.js -> loadProgress)
+        var playerCash = 0;     // Earned by clicking (Top, Orange Display)
+        var playerPoints = 0;   // Currency for shop (Bottom, White Display)
+        var clickValue = 1;     // How much playerCash is generated per click action
+        var upgradeCost = 10;   // Cost in playerPoints (for clickValue upgrader in shop)
+        var upgradeMultiplier = 2;
+        var upgradeLevel = 1;
+
+        // --- Shop Modal Logic ---
         openShopBtn.addEventListener('click', () => {
+            localStorage.setItem('playerCash', playerCash); // Pass current playerCash for shop conversion
+            localStorage.setItem('score', playerPoints);    // Pass current playerPoints for shop purchases (shop calls it 'score')
             shopModal.style.display = "block";
-            // Optionally force iframe to reload
-            // shopFrame.src = shopFrame.src; 
         });
+        
+        // Called by shop.js after it changes playerPoints (e.g. purchase)
+        window.updatePlayerPointsFromShop = function(newPointsValue) {
+            playerPoints = parseInt(newPointsValue) || 0;
+            if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
+        };
+
+        // Called by shop.js after it changes playerCash (e.g. conversion)
+        window.updatePlayerCashFromShop = function(newCashValue) {
+            playerCash = parseInt(newCashValue) || 0;
+            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+        };
 
         function closeShopModal() {
             shopModal.style.display = "none";
+            // Potentially refresh main page data if shop made changes not communicated back
+            // For now, localStorage is the main sync point.
         }
 
-        // Close modal if user clicks outside of the modal content
         window.onclick = function(event) {
             if (event.target == shopModal) {
                 closeShopModal();
             }
-        }
+        };
+        
+        // Function for shop.js to update click upgrader related variables in index.html
+        window.updateClickUpgraderStats = function(newClickValue, newUpgradeLevel, newUpgradeCost) {
+            clickValue = parseInt(newClickValue) || 1;
+            upgradeLevel = parseInt(newUpgradeLevel) || 1;
+            upgradeCost = parseInt(newUpgradeCost) || 10;
+            console.log(`Upgrader stats updated by shop: CV=${clickValue}, UL=${upgradeLevel}, UC=${upgradeCost}`);
+            // No UI element for upgrader directly in index.html anymore to update, 
+            // but these vars are used by applyClickBoost.
+        };
 
+        // --- Core Game Actions ---
         clickerBtn.addEventListener('click', () => {
-            count += clickValue;
-            counterEl.textContent = count;
+            const generatedPlayerCash = applyClickBoost(); // applyClickBoost now returns amount of playerCash
+            playerCash += generatedPlayerCash;
+            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+            // Update localStorage for the shop to see current playerCash if it needs to
+            localStorage.setItem('playerCash', playerCash); 
+            checkMightyClicks(); 
         });
 
-        upgradeBtn.addEventListener('click', () => {
-            if (count >= upgradeCost) {
-                count -= upgradeCost;
-                counterEl.textContent = count;
-                clickValue *= upgradeMultiplier;
-                upgradeLevel++;
-                upgradeCost = upgradeCost * upgradeMultiplier;
-
-                upgradeBtn.textContent = `Buy Upgrader (Cost: ${upgradeCost})`;
-
-                if (upgradeLevel === 500) {
-                    upgradeBtn.disabled = true;
-                    upgradeBtn.textContent = `Upgrader Maxed!`;
-                }
-            } else {
-                showMessage("Insufficient funds!");
-            }
-        });
+        // convertClicksBtn and its listener are removed.
     
-        function updateCounter() {
-            count += clickValue;
-            counterEl.textContent = count;
-        }
+        // updateCounter function is no longer directly used for main score.
+        // Auto-clicker and Interest have their own interval logic.
 
         function showMessage(text) {
             messageEl.textContent = text;
@@ -154,38 +167,45 @@
         }
 
         function resetGame() {
-            count = 0;
-            upgradeCost = 10;
+            playerCash = 0;
+            playerPoints = 0;
+            clickValue = 1; 
             upgradeLevel = 1;
-            clickValue = 1;
+            upgradeCost = 10; 
 
-            // Reset localStorage items for shop power-ups
-            localStorage.removeItem('doubleClick');
-            localStorage.removeItem('autoClicker');
-            localStorage.removeItem('clickBoostActive');
-            localStorage.removeItem('clickBoostEndTime');
-            localStorage.removeItem('gamblingCooldownLevel'); // Added
-            localStorage.removeItem('gamblingCooldownReduction');
-            localStorage.removeItem('interestLevel'); // Added
-            localStorage.removeItem('interestRate');
+            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+            if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
 
-            if (mightyClicksInterval) clearInterval(mightyClicksInterval); // Clear Mighty Clicks interval
-            if (interestInterval) clearInterval(interestInterval); // Clear Interest interval
+            // Reset ALL relevant localStorage items
+            const itemsToClear = [
+                'doubleClick', 'autoClicker', 'clickBoostActive', 'clickBoostEndTime',
+                'gamblingCooldownLevel', 'gamblingCooldownReduction', 
+                'interestLevel', 'interestRate', 
+                'score',          // This was playerPoints for the shop
+                'playerCash',     // This is the new item for earned cash
+                'clickValue', 'upgradeLevel', 'upgradeCost', 
+                'progress'        // The main save file
+            ];
+            itemsToClear.forEach(item => localStorage.removeItem(item));
+            
+            // Explicitly set initial values for shop after clearing, so shop doesn't see null/undefined before first save
+            localStorage.setItem('playerCash', '0');
+            localStorage.setItem('score', '0'); 
 
-            counterEl.textContent = count;
-            upgradeBtn.textContent = `Buy Upgrader (Cost: ${upgradeCost})`;
+            // Clear intervals for power-ups
+            if (mightyClicksInterval) { clearInterval(mightyClicksInterval); mightyClicksInterval = null; }
+            if (interestInterval) { clearInterval(interestInterval); interestInterval = null; }
+            // Auto-clicker interval is anonymous, will stop checking localStorage once 'autoClicker' is removed.
 
             showMessage("Game reset successfully!");
         }
         
-        // Modify existing auto-clicker logic if present, or add new one for shop item
-        // This is a placeholder for how the auto-clicker from the shop would work
-        // The actual auto-clicker logic is in shop.js and relies on localStorage
-        
         // --- Powerup Integration --- 
+        // (applyClickBoost, checkMightyClicks, and Mighty Clicks interval setup remain largely the same)
+        // (Auto Clicker and Golden Goose Interest logic need to be adjusted for clicks/cash)
 
-        let mightyClicksInterval = null;
-        let interestInterval = null;
+        let mightyClicksInterval = null; // For clickBoost
+        let interestInterval = null;   // For Golden Goose
 
         function applyClickBoost() {
             let boostedValue = clickValue;
@@ -223,44 +243,76 @@
             mightyClicksInterval = setInterval(checkMightyClicks, 1000);
         }
 
-        // Auto Clicker (from shop)
-        setInterval(() => {
-            if (localStorage.getItem('autoClicker') === 'true') {
-                count += applyClickBoost(); // Auto-clicker also benefits from boosts
-                counterEl.textContent = count;
+        // applyClickBoost function (determines clicks per action, including boosts)
+        // (This function should be defined before its first use by auto-clicker or manual click)
+        function applyClickBoost() {
+            let boostedClickValue = clickValue; // Start with base clickValue (from upgrades)
+            if (localStorage.getItem('doubleClick') === 'true') {
+                boostedClickValue *= 2;
             }
-        }, 1000); // Clicks every second
-
-        // Golden Goose Interest (from shop)
-        function applyInterest() {
-            const interestRate = parseFloat(localStorage.getItem('interestRate'));
-            if (interestRate && interestRate > 0) {
-                const earnings = Math.floor(count * (interestRate / 100));
-                if (earnings > 0) {
-                    count += earnings;
-                    counterEl.textContent = count;
-                    // showMessage(`${earnings} points earned from interest!`, "gold"); // Can be spammy
-                    console.log(`${earnings} points earned from interest!`);
+            if (localStorage.getItem('clickBoostActive') === 'true') {
+                boostedClickValue *= 3; // Mighty Clicks boost
+            }
+            return boostedClickValue;
+        }
+        
+        // Check and manage Mighty Clicks boost duration
+        // (Function definition for checkMightyClicks remains as it was, no changes needed for clicks/cash separation)
+        function checkMightyClicks() {
+            const boostActive = localStorage.getItem('clickBoostActive') === 'true';
+            if (boostActive) {
+                const endTime = parseInt(localStorage.getItem('clickBoostEndTime'));
+                if (Date.now() >= endTime) {
+                    localStorage.removeItem('clickBoostActive');
+                    localStorage.removeItem('clickBoostEndTime');
+                    showMessage("Mighty Clicks expired!", "orange");
+                    if (mightyClicksInterval) { clearInterval(mightyClicksInterval); mightyClicksInterval = null; }
+                } else {
+                    if (!mightyClicksInterval) { // If interval not set (e.g. on page load with active boost)
+                         mightyClicksInterval = setInterval(checkMightyClicks, 1000);
+                    }
                 }
             }
         }
-        // Start interest interval if powerup is present
-        if (parseFloat(localStorage.getItem('interestRate')) > 0) {
-             if(interestInterval) clearInterval(interestInterval); // Clear existing before setting new
-             interestInterval = setInterval(applyInterest, 10000); // Every 10 seconds
+        // Initial check for Mighty Clicks on load
+        checkMightyClicks();
+
+
+        // Auto Clicker (from shop) - generates playerCash
+        setInterval(() => {
+            if (localStorage.getItem('autoClicker') === 'true') {
+                const generatedPlayerCash = applyClickBoost();
+                playerCash += generatedPlayerCash;
+                if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+                localStorage.setItem('playerCash', playerCash); // Update for shop
+            }
+        }, 1000);
+
+        // Golden Goose Interest (from shop) - generates playerPoints based on playerPoints
+        function applyInterest() {
+            const currentInterestRate = parseFloat(localStorage.getItem('interestRate'));
+            if (currentInterestRate && currentInterestRate > 0) {
+                const earnings = Math.floor(playerPoints * (currentInterestRate / 100)); // Interest on playerPoints
+                if (earnings > 0) {
+                    playerPoints += earnings;
+                    if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
+                    localStorage.setItem('score', playerPoints); // Update 'score' (playerPoints)
+                    console.log(`${earnings} Points earned from interest!`);
+                }
+            }
         }
-        // Also need to re-init this interval if interestRate is bought/upgraded while page is open.
-        // This can be done by listening to localStorage changes or by a function called from shop.js.
-        // For simplicity, save.js loadProgress will re-establish on next load.
-        // A more dynamic approach would involve shop.js calling a function in parent window.
-
-
-        // Modified main click function to account for all boosts
-        clickerBtn.addEventListener('click', () => {
-            count += applyClickBoost();
-            counterEl.textContent = count;
-            checkMightyClicks(); // Check boost after click, though interval also handles it
-        });
+        
+        function initializeInterestInterval() {
+            if (interestInterval) { clearInterval(interestInterval); interestInterval = null; }
+            const currentInterestRate = parseFloat(localStorage.getItem('interestRate'));
+            if (currentInterestRate && currentInterestRate > 0) {
+                 interestInterval = setInterval(applyInterest, 10000);
+                 console.log("Interest interval initialized. Rate: " + currentInterestRate + "%");
+            } else {
+                 console.log("Interest interval not started (no active interest upgrade).");
+            }
+        }
+        initializeInterestInterval();
 
         // The existing setInterval(updateCounter, 1000) might be for a different upgrade.
         // If 'autoClicker' from the shop is the ONLY auto-clicker, then the original setInterval could be removed or conditional.
