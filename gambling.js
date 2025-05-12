@@ -6,8 +6,13 @@ function initClickerGame() {
   let isCooldown = false;
 
   luckyBtn.addEventListener('click', () => {
+    let cooldownTime = 30000; // Default 30 seconds
+    const reduction = parseInt(localStorage.getItem('gamblingCooldownReduction')) || 0;
+    cooldownTime -= (reduction * 1000); // reduction is in seconds
+    if (cooldownTime < 5000) cooldownTime = 5000; // Minimum 5 seconds cooldown
+
     if (isCooldown) {
-      messageEl.textContent = 'Cooldown in effect. Please wait 30 seconds.';
+      messageEl.textContent = `Cooldown in effect. Please wait ${cooldownTime / 1000} seconds.`;
       messageEl.style.display = 'block';
       return;
     }
@@ -52,7 +57,7 @@ function initClickerGame() {
     setTimeout(() => {
       isCooldown = false;
       messageEl.style.display = 'none';
-    }, 30000); // 30 seconds cooldown
+    }, cooldownTime);
   });
 }
 
