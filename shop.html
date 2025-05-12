@@ -3,9 +3,36 @@
 <head>
     <title>Shop</title>
     <link rel="stylesheet" href="shop.css">
+    <style>
+        body {
+            /* overflow: hidden; Hide scrollbar for the shop iframe */
+        }
+        .shop-currency-display {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            color: #fff;
+        }
+        .shop-currency-display span {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .shop-currency-display .cash {
+            color: #FFD700; /* Gold */
+        }
+        .shop-currency-display .points {
+            color: #FFFFFF; /* White */
+        }
+    </style>
 </head>
 <body>
     <div class="shop-container">
+        <div class="shop-currency-display">
+            Current Cash: <span id="shopCurrentCashDisplay" class="cash">0.0</span> | 
+            Current Points: <span id="shopCurrentPointsDisplay" class="points">0</span>
+        </div>
         <h1>Point Shop</h1>
         <div id="shopMessageDisplay" style="min-height: 1.5em; text-align: center; margin-bottom: 10px; color: #FFCC00;"></div> <!-- Message Display Area -->
         <p style="text-align: center;">Use your <strong>Points</strong> to buy upgrades. Convert <strong>Cash</strong> to Points here.</p>
@@ -13,7 +40,7 @@
             <li class="powerup-item conversion-item">
                 <h3>Refine Cash to Points</h3>
                 <p>Converts your earned Cash into spendable Points.<br>
-                   Rate: <strong style="color: #FFD700;">10 Cash</strong> = <strong style="color: #FFFFFF;">1 Point</strong>.
+                   <span id="conversionRateInfo">Rate: <strong style="color: #FFD700;">10 Cash</strong> = <strong style="color: #FFFFFF;">1 Point</strong>.</span>
                 </p>
                 <p>Current Cash: <span id="currentCashForConversion" style="color: #FFD700;">0</span></p>
                 <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px;">

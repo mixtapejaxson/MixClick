@@ -46,11 +46,15 @@ function showUIMessage(text, color = 'black', duration = 3000) { // Renamed to a
 
 
 function saveProgress(isAutoSave = false) {
-    // Assumes playerCash, playerPoints, clickValue, etc. are global on window object from index.html
+    // Values are now primarily validated by anticheat.js periodically.
+    // saveProgress will trust the values in localStorage or window, which anticheat.js aims to keep clean.
+    let currentCashToSave = parseFloat(localStorage.getItem('playerCash')) || window.playerCash || 0.0;
+    let currentPointsToSave = parseInt(localStorage.getItem('score')) || window.playerPoints || 0;
+
     const progress = {
-        playerCash: window.playerCash || 0,
-        playerPoints: window.playerPoints || 0,
-        clickValue: window.clickValue || 1,
+        playerCash: currentCashToSave,
+        playerPoints: currentPointsToSave,
+        clickValue: window.clickValue || 0.25,
         upgradeLevel: window.upgradeLevel || 1,
         upgradeCost: window.upgradeCost || 10,
         
@@ -62,13 +66,19 @@ function saveProgress(isAutoSave = false) {
         gamblingCooldownReduction: localStorage.getItem('gamblingCooldownReduction') || '0',
         gamblingCooldownLevel: localStorage.getItem('gamblingCooldownLevel') || '0',
         interestRate: localStorage.getItem('interestRate') || '0',
-        interestLevel: localStorage.getItem('interestLevel') || '0'
+        interestLevel: localStorage.getItem('interestLevel') || '0',
+
+        // Dynamic shop pricing trackers
+        conversionCount: localStorage.getItem('conversionCount') || '0',
+        mightyCashPurchaseCount: localStorage.getItem('mightyCashPurchaseCount') || '0'
     };
 
     try {
         const serializedProgress = JSON.stringify(progress);
         const encodedProgress = base64Encode(serializedProgress);
         localStorage.setItem('progress', encodedProgress);
+
+        // No longer storing lastValidatedPlayerCash/Points/Timestamp here; anticheat.js handles its own state.
 
         if (!isAutoSave) {
             showUIMessage("Progress Saved!", 'green');
@@ -90,9 +100,9 @@ function loadProgress() {
             const progress = JSON.parse(decodedProgress);
 
             // Update global variables in index.html scope
-            window.playerCash = parseInt(progress.playerCash) || 0;
+            window.playerCash = parseFloat(progress.playerCash) || 0.0;
             window.playerPoints = parseInt(progress.playerPoints) || 0;
-            window.clickValue = parseInt(progress.clickValue) || 1;
+            window.clickValue = parseFloat(progress.clickValue) || 0.25;
             window.upgradeLevel = parseInt(progress.upgradeLevel) || 1;
             window.upgradeCost = parseInt(progress.upgradeCost) || 10;
             
@@ -111,29 +121,51 @@ function loadProgress() {
             localStorage.setItem('interestRate', progress.interestRate || '0');
             localStorage.setItem('interestLevel', progress.interestLevel || '0');
 
+            // Load dynamic shop pricing trackers into localStorage
+            localStorage.setItem('conversionCount', progress.conversionCount || '0');
+            localStorage.setItem('mightyCashPurchaseCount', progress.mightyCashPurchaseCount || '0');
+
             // Update UI from loaded values - ensure elements exist
             const playerCashDisplayEl = document.getElementById('playerCashDisplay');
             const playerPointsDisplayEl = document.getElementById('playerPointsDisplay');
-            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${window.playerCash}`;
+            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${window.playerCash.toFixed(1)}`;
             if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${window.playerPoints}`;
             
             // Update localStorage for shop to read correct initial values upon opening after load
-            localStorage.setItem('playerCash', window.playerCash.toString());
+            localStorage.setItem('playerCash', window.playerCash.toString()); // Save full precision
             localStorage.setItem('score', window.playerPoints.toString()); // Shop uses 'score' for playerPoints
-
+            
             showUIMessage("Progress Loaded!", 'green');
 
             // Re-initialize intervals based on loaded state (functions must be global in index.html)
             if (typeof window.checkMightyClicks === 'function') window.checkMightyClicks();
             if (typeof window.initializeInterestInterval === 'function') window.initializeInterestInterval();
 
+            // Initialize anticheat value checks with loaded values
+            if (typeof window.antiCheatInitializeValueChecks === 'function') {
+                window.antiCheatInitializeValueChecks(window.playerCash, window.playerPoints);
+            }
+
         } catch (e) {
             console.error("Error loading progress:", e);
             showUIMessage("Failed to load progress. Save might be corrupted.", "red");
             localStorage.removeItem('progress'); // Corrupted save removed
+            // Even if load fails, try to init anticheat with default values
+            if (typeof window.antiCheatInitializeValueChecks === 'function') {
+                window.antiCheatInitializeValueChecks(0.0, 0);
+            }
         }
     } else {
         showUIMessage("No saved progress found.", "orange");
+        // No save found, initialize anticheat with default values
+        // Ensure playerCash/Points are at default before calling this if they aren't already
+        window.playerCash = 0.0; 
+        window.playerPoints = 0;
+        window.clickValue = 0.25; // Assuming this is the correct default from index.html
+        // ... other defaults if needed by anticheat logic or if they are not set in index.html before this point.
+        if (typeof window.antiCheatInitializeValueChecks === 'function') {
+            window.antiCheatInitializeValueChecks(window.playerCash, window.playerPoints);
+        }
     }
 }
 
@@ -143,15 +175,14 @@ function resetProgress() {
     console.warn("resetProgress() in save.js called. Ensure this is intended alongside index.html resetGame.");
     // Reset global game variables in index.html scope (if they are global)
     if(window) {
-        window.playerCash = 0;
+        window.playerCash = 0.0;
         window.playerPoints = 0;
-        window.clickValue = 1; 
+        window.clickValue = 0.25; 
         window.upgradeLevel = 1; 
         window.upgradeCost = 10;
     }
 
-    // Clear main progress file from localStorage
-    localStorage.removeItem('progress');
+    // Clear main progress file from localStorage --- This line is removed as 'progress' is now in itemsToClear
 
     // Clear all individual game state and shop-specific items from localStorage
     const itemsToClear = [
@@ -160,25 +191,48 @@ function resetProgress() {
         'interestLevel', 'interestRate', 
         'score',          // PlayerPoints for the shop
         'playerCash',     // Earned cash
-        'clickValue', 'upgradeLevel', 'upgradeCost'
+        'clickValue', 'upgradeLevel', 'upgradeCost',
+        // Added dynamic shop trackers
+        'conversionCount',
+        'mightyCashPurchaseCount',
+        'progress' // Main save file
+        // 'lastValidatedPlayerCash', 'lastValidatedPlayerPoints', 'lastSaveTimestamp' are no longer used by save.js
     ];
     itemsToClear.forEach(item => localStorage.removeItem(item));
 
     // Update UI elements if available (mostly handled by index.html's resetGame now)
     const playerCashDisplayEl = document.getElementById('playerCashDisplay');
     const playerPointsDisplayEl = document.getElementById('playerPointsDisplay');
-    if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: 0`;
+    if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: 0.0`;
     if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: 0`;
             
-    // Explicitly set initial values for shop after clearing
-    localStorage.setItem('playerCash', '0');
-    localStorage.setItem('score', '0');
+    // Explicitly set initial values for shop and dynamic trackers after clearing
+    localStorage.setItem('playerCash', '0.0');
+    localStorage.setItem('score', '0'); 
+    localStorage.setItem('conversionCount', '0');
+    localStorage.setItem('mightyCashPurchaseCount', '0');
+    // lastValidated items are no longer managed by save.js
+
+    // Also ensure other relevant shop items are explicitly reset if not covered by game variable reset
+    localStorage.setItem('doubleClick', 'false');
+    localStorage.setItem('autoClicker', 'false');
+    localStorage.setItem('clickBoostActive', 'false');
+    localStorage.removeItem('clickBoostEndTime');
+    localStorage.setItem('gamblingCooldownLevel', '0');
+    localStorage.setItem('gamblingCooldownReduction', '0');
+    localStorage.setItem('interestLevel', '0');
+    localStorage.setItem('interestRate', '0');
 
     showUIMessage("Progress Reset!", 'red');
     
     // Re-initialize intervals to ensure they stop or reset to initial state
     if (typeof window.checkMightyClicks === 'function') window.checkMightyClicks(); // will find boostActive is false
     if (typeof window.initializeInterestInterval === 'function') window.initializeInterestInterval(); // will find rate is 0
+
+    // Initialize anticheat value checks with reset values
+    if (typeof window.antiCheatInitializeValueChecks === 'function') {
+        window.antiCheatInitializeValueChecks(0.0, 0);
+    }
 }
 
 // Auto Save Progress
