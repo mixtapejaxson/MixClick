@@ -86,18 +86,19 @@
         const shopFrame = document.getElementById('shopFrame');
 
         // Game Variables (will be loaded by save.js -> loadProgress)
-        var playerCash = 0;     // Earned by clicking (Top, Orange Display)
+        var playerCash = 0.0;     // Earned by clicking (Top, Orange Display)
         var playerPoints = 0;   // Currency for shop (Bottom, White Display)
-        var clickValue = 1;     // How much playerCash is generated per click action
+        var clickValue = 0.25;     // How much playerCash is generated per click action
         var upgradeCost = 10;   // Cost in playerPoints (for clickValue upgrader in shop)
         var upgradeMultiplier = 2;
         var upgradeLevel = 1;
 
         // --- Shop Modal Logic ---
         openShopBtn.addEventListener('click', () => {
-            localStorage.setItem('playerCash', playerCash); // Pass current playerCash for shop conversion
-            localStorage.setItem('score', playerPoints);    // Pass current playerPoints for shop purchases (shop calls it 'score')
+            localStorage.setItem('playerCash', playerCash.toString()); // Pass current playerCash for shop conversion
+            localStorage.setItem('score', playerPoints.toString());    // Pass current playerPoints for shop purchases (shop calls it 'score')
             shopModal.style.display = "block";
+            document.body.style.overflow = 'hidden'; // Hide main window scrollbar
         });
         
         // Called by shop.js after it changes playerPoints (e.g. purchase)
@@ -116,11 +117,11 @@
         // Called by shop.js after it changes playerCash (e.g. conversion)
         window.updatePlayerCashFromShop = function(newCashValue) {
             console.log('updatePlayerCashFromShop called with:', newCashValue);
-            playerCash = parseInt(newCashValue) || 0;
-             // Ensure the display element exists before updating
+            playerCash = parseFloat(newCashValue) || 0.0;
+            // Ensure the display element exists before updating
             if (playerCashDisplayEl) {
-                playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
-                 console.log('Player cash display updated to:', playerCash);
+                playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
+                 console.log('Player cash display updated to:', playerCash.toFixed(1));
             } else {
                 console.error('playerCashDisplayEl not found!');
             }
@@ -128,6 +129,7 @@
 
         function closeShopModal() {
             shopModal.style.display = "none";
+            document.body.style.overflow = 'auto'; // Restore main window scrollbar
             // Potentially refresh main page data if shop made changes not communicated back
             // For now, localStorage is the main sync point.
         }
@@ -152,9 +154,9 @@
         clickerBtn.addEventListener('click', () => {
             const generatedPlayerCash = applyClickBoost(); // applyClickBoost now returns amount of playerCash
             playerCash += generatedPlayerCash;
-            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
             // Update localStorage for the shop to see current playerCash if it needs to
-            localStorage.setItem('playerCash', playerCash); 
+            localStorage.setItem('playerCash', playerCash.toString()); // Save full precision
             checkMightyClicks(); 
         });
 
@@ -183,11 +185,11 @@
         function resetGame() {
             playerCash = 0;
             playerPoints = 0;
-            clickValue = 1; 
+            clickValue = 0.25; 
             upgradeLevel = 1;
             upgradeCost = 10; 
 
-            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
+            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
             if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
 
             // Reset ALL relevant localStorage items
@@ -297,8 +299,8 @@
             if (localStorage.getItem('autoClicker') === 'true') {
                 const generatedPlayerCash = applyClickBoost();
                 playerCash += generatedPlayerCash;
-                if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash}`;
-                localStorage.setItem('playerCash', playerCash); // Update for shop
+                if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
+                localStorage.setItem('playerCash', playerCash.toString()); // Update for shop, save full precision
             }
         }, 1000);
 

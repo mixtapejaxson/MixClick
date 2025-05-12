@@ -2,9 +2,18 @@
 const anticheatConfig = {
     rightClickMessage: 'ANTICHEAT: Right-click Context Menu Blocked!',
     keyEventMessage: 'ANTICHEAT: Key events blocked!',
-    allowedKeys: ['F5', 'F12', 'Ctrl', 'Shift', 'Tab'], // Added Tab for accessibility, kept dev keys
-    autoclickThreshold: 85, // Clicks faster than 100ms apart trigger detection
+    allowedKeys: ['F5', 'Ctrl', 'Shift', 'Tab'], // Added Tab for accessibility, kept dev keys
+    autoclickDetectionIntervalMs: 85, // Time window in ms to detect clicks
+    autoclickMaxClicksInInterval: 2,   // Number of clicks within the interval to trigger a warning
     warningsBeforeReset: 5, // Number of warnings before progress is reset
+
+    // Value Integrity Checks (Tune these carefully!)
+    valueCheckIntervalMs: 3000,           // How often (ms) to check player cash/points values
+    maxCashIncreasePerSec: 100000,        // Max legitimate cash increase per second (NEEDS TUNING)
+    maxPointsIncreasePerSec: 10000,       // Max legitimate points increase per second (NEEDS TUNING)
+    valueSpikeBufferMultiplier: 1.5,      // Allows 50% extra buffer for legitimate spikes
+    minTimeDiffForValueCheckSec: 1,     // Min time diff for a meaningful check
+
     saveFileIntegrityCheck: false, // Keep this false unless fully implemented and tested with save.js
     saveFileSalt: 'somesupersecretstring',
 };
@@ -45,28 +54,34 @@ document.addEventListener('keydown', function(event) {
 });
 
 // Anti-autoclicker
-let lastClickTime = 0;
-let warningCounter = 0; // Renamed from banCounter
+let warningCounter = 0; 
+let clickTimestamps = []; // Array to store recent click timestamps
 
 document.addEventListener('click', function(event) {
-    if (isModalOpen) { // Prevent clicks behind the modal
+    if (isModalOpen && !(event.target && event.target.closest && event.target.closest('#anticheatWarningModal'))) { // Prevent clicks behind the modal, but allow clicks ON the modal
         event.preventDefault();
         event.stopImmediatePropagation();
         return;
     }
 
-    let currentTime = new Date().getTime();
-    // Ignore clicks if the target is a button inside an anticheat modal
+    const currentTime = new Date().getTime();
+
     if (event.target && event.target.closest && event.target.closest('#anticheatWarningModal')) {
-        lastClickTime = currentTime; // Reset lastClickTime to prevent modal click from triggering detection
+        clickTimestamps = []; 
         return;
     }
 
-    if (currentTime - lastClickTime < anticheatConfig.autoclickThreshold) {
-        event.preventDefault();
+    clickTimestamps.push(currentTime);
+    clickTimestamps = clickTimestamps.filter(timestamp => currentTime - timestamp < anticheatConfig.autoclickDetectionIntervalMs);
+
+    if (clickTimestamps.length === anticheatConfig.autoclickMaxClicksInInterval) {
+        event.preventDefault(); 
         event.stopImmediatePropagation(); 
+        
         warningCounter++;
-        console.warn(`ANTICHEAT: Fast click detected. Warning ${warningCounter}/${anticheatConfig.warningsBeforeReset}`);
+        console.warn(`ANTICHEAT: Rapid clicking detected (${clickTimestamps.length} clicks in interval). Warning ${warningCounter}/${anticheatConfig.warningsBeforeReset}`);
+        
+        clickTimestamps = []; 
 
         if (warningCounter >= anticheatConfig.warningsBeforeReset) {
             triggerProgressReset();
@@ -74,80 +89,57 @@ document.addEventListener('click', function(event) {
             const remainingWarnings = anticheatConfig.warningsBeforeReset - warningCounter;
             showAutoclickWarningModal(remainingWarnings);
         }
-    } else {
-        lastClickTime = currentTime;
     }
-}, false); // Temporarily disable capture phase to test modal button
+}, true); 
 
 function showAutoclickWarningModal(remainingWarnings) {
-    if (isModalOpen) return; // Prevent multiple modals
+    if (isModalOpen) return; 
     isModalOpen = true;
 
-    // Modal Overlay
     const overlay = document.createElement('div');
     overlay.id = 'anticheatWarningOverlay';
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.7); z-index: 10000; display: flex; /* Increased z-index */
-        justify-content: center; align-items: center;
-    `;
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10000; display: flex; justify-content: center; align-items: center;';
 
-    // Modal Content Box
     const modal = document.createElement('div');
     modal.id = 'anticheatWarningModal';
-    modal.style.cssText = `
-        background-color: #333; color: #fff; padding: 30px; border-radius: 10px;
-        text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5); min-width: 300px; max-width: 80%;
-        font-family: Ubuntu, sans-serif; z-index: 10001; /* Increased z-index */
-    `;
+    modal.style.cssText = 'background-color: #333; color: #fff; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5); min-width: 300px; max-width: 80%; font-family: Ubuntu, sans-serif; z-index: 10001;';
 
-    // Title
     const title = document.createElement('h2');
     title.textContent = 'Warning!';
     title.style.color = '#ffcc00';
     title.style.marginTop = '0';
 
-    // Message
     const message = document.createElement('p');
-    message.innerHTML = `We have detected suspicious clicking activity.<br>
-                         After <strong>${remainingWarnings}</strong> more detection(s), your game progress will be reset.`;
+    message.innerHTML = `We have detected suspicious clicking activity.<br>After <strong>${remainingWarnings}</strong> more detection(s), your game progress will be reset.`;
     message.style.marginBottom = '20px';
     message.style.lineHeight = '1.6';
 
-    // OK Button
     const okButton = document.createElement('button');
-    okButton.textContent = 'OK';
+    let countdown = 5;
+    okButton.textContent = `OK (${countdown})`;
     okButton.disabled = true;
-    okButton.style.cssText = `
-        padding: 10px 20px; border: none; border-radius: 5px;
-        background-color: #555; color: #ccc; cursor: not-allowed;
-        font-size: 1em;
-    `;
+    okButton.style.cssText = 'padding: 10px 20px; border: none; border-radius: 5px; background-color: #555; color: #ccc; cursor: not-allowed; font-size: 1em;';
 
-    // Enable button after 5 seconds
-    setTimeout(() => {
-        okButton.disabled = false;
-        okButton.style.backgroundColor = '#ff6600'; // Theme color from styles.css
-        okButton.style.color = '#fff';
-        okButton.style.cursor = 'pointer';
-    }, 5000);
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            okButton.textContent = `OK (${countdown})`;
+        } else {
+            clearInterval(countdownInterval);
+            okButton.textContent = 'OK';
+            okButton.disabled = false;
+            okButton.style.backgroundColor = '#ff6600';
+            okButton.style.color = '#fff';
+            okButton.style.cursor = 'pointer';
+            console.log("OK button enabled via countdown.");
+        }
+    }, 1000);
 
     okButton.addEventListener('click', () => {
-        console.log("OK button clicked! isModalOpen before:", isModalOpen);
-        document.body.removeChild(overlay);
+        if(document.body.contains(overlay)) document.body.removeChild(overlay);
         isModalOpen = false;
-        console.log("isModalOpen after:", isModalOpen);
-        lastClickTime = new Date().getTime(); // Reset lastClickTime after modal interaction
+        clickTimestamps = []; 
     });
-    console.log("Enabling OK button after 5 seconds...");
-
-    setTimeout(() => {
-        okButton.disabled = false;
-        okButton.style.backgroundColor = '#ff6600'; // Theme color from styles.css
-        okButton.style.color = '#fff';
-        okButton.style.cursor = 'pointer';
-        console.log("OK button enabled!");
-    }, 5000);
 
     modal.appendChild(title);
     modal.appendChild(message);
@@ -157,47 +149,136 @@ function showAutoclickWarningModal(remainingWarnings) {
 }
 
 function triggerProgressReset() {
-    isModalOpen = true; // Keep other interactions blocked
+    isModalOpen = true; 
     console.warn('ANTICHEAT: Progress reset due to persistent autoclicking.');
 
-    // Display a final notification modal
     const overlay = document.createElement('div');
     overlay.id = 'anticheatResetOverlay';
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.85); z-index: 9998; display: flex;
-        justify-content: center; align-items: center; text-align: center;
-    `;
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 9998; display: flex; justify-content: center; align-items: center; text-align: center;';
     const modal = document.createElement('div');
-    modal.style.cssText = `
-        background-color: #aa0000; color: #fff; padding: 30px; border-radius: 10px;
-        font-family: Ubuntu, sans-serif;
-    `;
+    modal.style.cssText = 'background-color: #aa0000; color: #fff; padding: 30px; border-radius: 10px; font-family: Ubuntu, sans-serif;';
     modal.innerHTML = '<h2>Progress Reset</h2><p>Your game progress has been reset due to persistent autoclicker detection.</p>';
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-    // Call the global reset function from index.html
     if (typeof window.resetGame === 'function') {
         window.resetGame();
     } else {
         console.error('resetGame function not found on window object!');
-        // As a fallback, try to clear essential localStorage items directly
         localStorage.removeItem('progress');
         localStorage.removeItem('score');
-        localStorage.removeItem('clicks');
         // ... and other critical items
     }
-    warningCounter = 0; // Reset warning counter
+    warningCounter = 0; 
 
-    // After a short delay, remove the reset notification modal to allow starting over.
-    // Or, you might choose to reload the page.
     setTimeout(() => {
         if(document.body.contains(overlay)) document.body.removeChild(overlay);
         isModalOpen = false;
-        // location.reload(); // Optional: force a page reload
     }, 4000);
 }
+
+// --- Value Integrity Checks ---
+let ac_lastKnownCash = 0.0;
+let ac_lastKnownPoints = 0;
+let ac_lastValueCheckTimestamp = Date.now();
+let ac_valueIntegrityIntervalId = null;
+
+function ac_showUIMessage(text, color = 'orange', duration = 4000) {
+    if (typeof showUIMessage === 'function') { 
+        showUIMessage(text, color, duration);
+    } else {
+        console.warn("ANTICHEAT: global showUIMessage not found. Fallback for:", text);
+        let messageElId = 'anticheat_value_warning_message';
+        let messageEl = document.getElementById(messageElId);
+        if (!messageEl) {
+            messageEl = document.createElement('div');
+            messageEl.id = messageElId;
+            messageEl.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);padding:10px 20px;background-color:orange;color:white;z-index:2005;border-radius:5px;text-align:center;box-shadow: 0 0 10px rgba(0,0,0,0.5);';
+            document.body.appendChild(messageEl);
+        }
+        messageEl.textContent = text;
+        messageEl.style.display = 'block';
+        setTimeout(() => { if (messageEl) messageEl.style.display = 'none'; }, duration);
+    }
+}
+
+function performValueIntegrityCheck() {
+    if (typeof window === 'undefined' || typeof window.playerCash === 'undefined' || typeof window.playerPoints === 'undefined') {
+        return; 
+    }
+
+    let currentCashInWindow = window.playerCash;
+    let currentPointsInWindow = window.playerPoints;
+    let cashCorrected = false;
+    let pointsCorrected = false;
+
+    const currentTime = Date.now();
+    let timeElapsedSec = (currentTime - ac_lastValueCheckTimestamp) / 1000;
+
+    if (timeElapsedSec < anticheatConfig.minTimeDiffForValueCheckSec && timeElapsedSec >= 0) {
+        return; 
+    }
+    if (timeElapsedSec < 0) { 
+        console.warn("ANTICHEAT: System clock moved backwards. Resetting value check baseline.");
+        ac_lastValueCheckTimestamp = currentTime;
+        ac_lastKnownCash = currentCashInWindow;
+        ac_lastKnownPoints = currentPointsInWindow;
+        return;
+    }
+
+    const maxExpectedCash = (ac_lastKnownCash + 0.001) + (anticheatConfig.maxCashIncreasePerSec * timeElapsedSec * anticheatConfig.valueSpikeBufferMultiplier);
+    if (currentCashInWindow > maxExpectedCash && currentCashInWindow > ac_lastKnownCash) { 
+        console.warn(`ANTICHEAT: Player CASH spike! Window: ${currentCashInWindow.toFixed(1)}, Max Expected: ${maxExpectedCash.toFixed(1)}, Last Known: ${ac_lastKnownCash.toFixed(1)}. dT: ${timeElapsedSec.toFixed(2)}s`);
+        currentCashInWindow = parseFloat(maxExpectedCash.toFixed(0)); 
+        window.playerCash = currentCashInWindow; 
+        localStorage.setItem('playerCash', currentCashInWindow.toString()); 
+        const cashDisplayEl = document.getElementById('playerCashDisplay');
+        if (cashDisplayEl) cashDisplayEl.textContent = `Cash: ${currentCashInWindow.toFixed(1)}`;
+        cashCorrected = true;
+    }
+
+    const maxExpectedPoints = (ac_lastKnownPoints + 1) + (anticheatConfig.maxPointsIncreasePerSec * timeElapsedSec * anticheatConfig.valueSpikeBufferMultiplier);
+    if (currentPointsInWindow > maxExpectedPoints && currentPointsInWindow > ac_lastKnownPoints) {
+        console.warn(`ANTICHEAT: Player POINTS spike! Window: ${currentPointsInWindow}, Max Expected: ${maxExpectedPoints.toFixed(0)}, Last Known: ${ac_lastKnownPoints}. dT: ${timeElapsedSec.toFixed(2)}s`);
+        currentPointsInWindow = parseInt(maxExpectedPoints.toFixed(0));
+        window.playerPoints = currentPointsInWindow; 
+        localStorage.setItem('score', currentPointsInWindow.toString()); 
+        const pointsDisplayEl = document.getElementById('playerPointsDisplay');
+        if (pointsDisplayEl) pointsDisplayEl.textContent = `Points: ${currentPointsInWindow}`;
+        pointsCorrected = true;
+    }
+
+    if (cashCorrected || pointsCorrected) {
+        ac_showUIMessage("Suspicious game values corrected.", "orange");
+    }
+
+    ac_lastKnownCash = currentCashInWindow; 
+    ac_lastKnownPoints = currentPointsInWindow; 
+    ac_lastValueCheckTimestamp = currentTime;
+}
+
+window.antiCheatInitializeValueChecks = function(initialCash, initialPoints) {
+    console.log("ANTICHEAT: Initializing value integrity checks with game state:", { initialCash, initialPoints });
+    ac_lastKnownCash = parseFloat(initialCash) || 0.0;
+    ac_lastKnownPoints = parseInt(initialPoints) || 0;
+    ac_lastValueCheckTimestamp = Date.now();
+
+    if (ac_valueIntegrityIntervalId) clearInterval(ac_valueIntegrityIntervalId);
+    ac_valueIntegrityIntervalId = setInterval(performValueIntegrityCheck, anticheatConfig.valueCheckIntervalMs);
+    console.log(`ANTICHEAT: Value integrity check interval started (every ${anticheatConfig.valueCheckIntervalMs}ms).`);
+};
+
+setTimeout(() => {
+    if (!ac_valueIntegrityIntervalId && typeof window !== 'undefined' && 
+        typeof window.playerCash !== 'undefined' && typeof window.playerPoints !== 'undefined') {
+        if (localStorage.getItem('progress') || window.playerCash !== 0 || window.playerPoints !== 0 ) { // Try to see if game has some state
+             console.warn("ANTICHEAT: Attempting delayed self-initialization of value integrity checks. Explicit call to antiCheatInitializeValueChecks from game is preferred.");
+            window.antiCheatInitializeValueChecks(window.playerCash, window.playerPoints);
+        } else {
+            console.log("ANTICHEAT: Delayed self-init for value checks skipped (no progress/initial values look zero). Waiting for explicit call.");
+        }
+    }
+}, 3000); 
 
 // Save file integrity check (example - adapt to your save system)
 // Currently disabled in config. If enabled, ensure it's adapted for save.js structure.
