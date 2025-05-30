@@ -5,15 +5,16 @@
     <script src="anticheat.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MixClick</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="static/css/styles.css">
     <script src="save.js"></script>
     <script src="gambling.js"></script>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
 </head>
 <body>
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+ 
     <div class="container">
-        <h1 id="playerCashDisplay" class="counter" style="color: #FFD700; margin-bottom: 0px;">Cash: 0</h1> <!-- Swapped: Top, Orange, H1 -->
-        <h2 id="playerPointsDisplay" class="counter" style="color: #FFFFFF; font-size: 2.5em; margin-top: 0px;">Points: 0</h2> <!-- Swapped: Bottom, White, H2 -->
+        <h1 id="playerCashDisplay" class="counter" style="color: #FFD700; margin-bottom: 0px;">Cash: 0</h1>
+        <h2 id="playerPointsDisplay" class="counter" style="color: #FFFFFF; font-size: 2.5em; margin-top: 0px;">Points: 0</h2>
         <br>
         <button class="clicker" id="clickerBtn">Click Me!</button><br><br>
         <button class="clicker" id="openShopBtn">Open Shop</button><br><br>
@@ -27,7 +28,7 @@
         <div class="modal-content">
             <span class="close-button" onclick="closeShopModal()">&times;</span>
             <h2>Shop</h2>
-            <iframe id="shopFrame" src="shop.html" style="width:100%; height:400px; border:none;"></iframe>
+            <iframe id="shopFrame" src="shop/shop.html" style="width:100%; height:400px; border:none;"></iframe>
         </div>
     </div>
 
@@ -78,7 +79,6 @@
         const playerCashDisplayEl = document.getElementById('playerCashDisplay'); // Was clicksDisplayEl
         const playerPointsDisplayEl = document.getElementById('playerPointsDisplay'); // Was cashDisplayEl
         const clickerBtn = document.getElementById('clickerBtn');
-        // convertClicksBtn removed
         const luckyBtn = document.getElementById('luckyBtn');
         const messageEl = document.getElementById('message');
         const openShopBtn = document.getElementById('openShopBtn');
@@ -219,6 +219,7 @@
         // --- Powerup Integration --- 
         // (applyClickBoost, checkMightyClicks, and Mighty Clicks interval setup remain largely the same)
         // (Auto Clicker and Golden Goose Interest logic need to be adjusted for clicks/cash)
+        // TODO: Add later
 
         let mightyClicksInterval = null; // For clickBoost
         let interestInterval = null;   // For Golden Goose
@@ -329,31 +330,6 @@
             }
         }
         initializeInterestInterval();
-
-        // The existing setInterval(updateCounter, 1000) might be for a different upgrade.
-        // If 'autoClicker' from the shop is the ONLY auto-clicker, then the original setInterval could be removed or conditional.
-        // For now, I'm leaving the original setInterval as it might be tied to an in-game upgrade rather than the shop.
-        // If they are meant to be the same, the logic should be merged.
-        // The original updateCounter function:
-        // function updateCounter() {
-        //     count += clickValue;
-        //     counterEl.textContent = count;
-        // }
-        // setInterval(updateCounter, 1000);
-
-        // To prevent double auto-clicking if the original updateCounter is for the same purpose as the shop's autoClicker:
-        // Option 1: Remove the original setInterval(updateCounter, 1000) if shop.js autoClicker is the sole one.
-        // Option 2: Make the original updateCounter conditional, e.g., if (!localStorage.getItem('autoClicker')) { setInterval(updateCounter, 1000); }
-        // For now, I'll assume they might be separate features, but this is a key area for review based on game design.
-
-        // Let's modify the existing updateCounter to NOT run if the shop's autoClicker is active to avoid double counting if they are the same feature.
-        // And ensure the shop's autoClicker correctly uses the clickValue (which can be upgraded)
-        // And the doubleClick powerup.
-
-        // Remove original setInterval, it will be handled by the shop.js logic or a combined one
-        // The line `setInterval(updateCounter, 1000);` should be removed or commented out.
-        // Let's find and comment it out.
-        // setInterval(updateCounter, 1000); // Commented out to avoid conflict with shop auto-clicker
 
     </script>
 </body>
