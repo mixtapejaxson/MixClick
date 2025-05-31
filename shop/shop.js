@@ -43,7 +43,7 @@ function displayShopMessage(text, type = 'info', duration = 3000) {
     }
     messageEl.textContent = text;
     messageEl.style.display = 'block';
-    // Basic styling based on type
+    // FIX: Consistent color application
     if (type === 'error') messageEl.style.color = '#FF6B6B'; // Light red
     else if (type === 'success') messageEl.style.color = '#6BFF6B'; // Light green
     else messageEl.style.color = '#AADDFF'; // Default info color (light blue)
@@ -60,20 +60,18 @@ function displayShopMessage(text, type = 'info', duration = 3000) {
 // --- Core Shop Logic ---
 function buyPowerup(powerupType) {
     console.log(`buyPowerup called for: ${powerupType}`);
+    // Get current values directly from localStorage, as index.html now keeps it updated
     let playerPoints = getGameVar('score', 0);
     let playerCash = getFloatGameVar('playerCash', 0.0);
     let originalPlayerPoints = playerPoints;
     let originalPlayerCash = playerCash;
     let conversionCount = getGameVar('conversionCount', 0);
-    let mightyCashPurchaseCount = getGameVar('mightyCashPurchaseCount', 0); // Moved to function scope
+    let mightyCashPurchaseCount = getGameVar('mightyCashPurchaseCount', 0); 
 
-    const upgradeMultiplier = 2;
     const maxUpgradeLevel = 500;
-    // Initial conversion rate: 10 Cash = 1 Point
-    // Rate increases by 5 Cash for every 10 conversions
     const baseConversionRate = 10;
-    const rateIncreasePerBlock = 10; // More aggressive increase
-    const conversionsPerBlock = 8;  // More frequent increase
+    const rateIncreasePerBlock = 10;
+    const conversionsPerBlock = 8;
     const currentConversionBlock = Math.floor(conversionCount / conversionsPerBlock);
     const currentDynamicConversionRate = baseConversionRate + (currentConversionBlock * rateIncreasePerBlock);
 
@@ -85,7 +83,6 @@ function buyPowerup(powerupType) {
             if (isNaN(amountToConvert) || amountToConvert <= 0) {
                 displayShopMessage("Please enter a valid amount of Cash.", 'error'); return;
             }
-            // Amount to convert must be a multiple of the current dynamic rate
             if (amountToConvert % currentDynamicConversionRate !== 0) {
                 displayShopMessage(`Amount must be a multiple of ${currentDynamicConversionRate} for conversion.`, 'error'); return;
             }
@@ -93,9 +90,9 @@ function buyPowerup(powerupType) {
                 const pointsGained = amountToConvert / currentDynamicConversionRate;
                 playerCash -= amountToConvert;
                 playerPoints += pointsGained;
-                conversionCount++; // Increment successful conversions
-                localStorage.setItem('conversionCount', conversionCount);
-                displayShopMessage(`Converted ${amountToConvert} Cash to ${pointsGained} Points! (Rate: ${currentDynamicConversionRate}:1)`, 'success');
+                conversionCount++;
+                localStorage.setItem('conversionCount', conversionCount.toString());
+                displayShopMessage(`Converted ${amountToConvert.toFixed(1)} Cash to ${pointsGained} Points! (Rate: ${currentDynamicConversionRate}:1)`, 'success');
                 if (cashInput) cashInput.value = '';
             } else {
                 displayShopMessage("Not enough Cash to convert!", 'error'); return;
@@ -104,27 +101,26 @@ function buyPowerup(powerupType) {
             let currentClickValue = getFloatGameVar('clickValue', 0.25);
             let currentUpgradeLevel = getGameVar('upgradeLevel', 1);
             let currentUpgradeCost = getGameVar('upgradeCost', 10);
-            // mightyCashPurchaseCount is now defined at the top of the function
 
             if (currentUpgradeLevel >= maxUpgradeLevel) {
                 displayShopMessage('Cash Clicker is already maxed out!', 'info'); return;
             }
             if (playerPoints >= currentUpgradeCost) {
                 playerPoints -= currentUpgradeCost;
-                currentClickValue += 0.25; // Increase by 0.25 each time, for example
+                currentClickValue += 0.25;
                 currentUpgradeLevel++;
-                currentUpgradeCost = Math.floor(currentUpgradeCost * 1.5); // Example cost increase
+                currentUpgradeCost = Math.floor(currentUpgradeCost * 1.5);
 
-                localStorage.setItem('clickValue', currentClickValue.toString());
-                localStorage.setItem('upgradeLevel', currentUpgradeLevel);
-                localStorage.setItem('upgradeCost', currentUpgradeCost);
+                localStorage.setItem('clickValue', currentClickValue.toFixed(2));
+                localStorage.setItem('upgradeLevel', currentUpgradeLevel.toString());
+                localStorage.setItem('upgradeCost', currentUpgradeCost.toString());
 
                 if (window.parent && typeof window.parent.updateClickUpgraderStats === 'function') {
                     window.parent.updateClickUpgraderStats(currentClickValue, currentUpgradeLevel, currentUpgradeCost);
                 } else {
                     console.warn('Could not call updateClickUpgraderStats on parent window.');
                 }
-                displayShopMessage(`Cash Clicker Upgraded to Level ${currentUpgradeLevel} (Value: ${currentClickValue})!`, 'success');
+                displayShopMessage(`Cash Clicker Upgraded to Level ${currentUpgradeLevel} (Value: ${currentClickValue.toFixed(2)})!`, 'success');
             } else {
                 displayShopMessage('Not enough Points for Cash Clicker!', 'error'); return;
             }
@@ -149,6 +145,10 @@ function buyPowerup(powerupType) {
                 playerPoints -= cost;
                 localStorage.setItem('autoClicker', 'true');
                 displayShopMessage('Auto Cash Generator purchased!', 'success');
+                // Inform main window to initialize auto clicker
+                if (window.parent && typeof window.parent.initializeAutoClicker === 'function') {
+                    window.parent.initializeAutoClicker();
+                }
             } else {
                 displayShopMessage('Not enough Points for Auto Cash!', 'error'); return;
             }
@@ -162,8 +162,12 @@ function buyPowerup(powerupType) {
                 localStorage.setItem('clickBoostActive', 'true');
                 localStorage.setItem('clickBoostEndTime', Date.now() + 30000);
                 mightyCashPurchaseCount++;
-                localStorage.setItem('mightyCashPurchaseCount', mightyCashPurchaseCount);
+                localStorage.setItem('mightyCashPurchaseCount', mightyCashPurchaseCount.toString());
                 displayShopMessage('Mighty Cash purchased! (30s Triple Cash)', 'success');
+                // Inform main window to check mighty clicks status
+                if (window.parent && typeof window.parent.checkMightyClicks === 'function') {
+                    window.parent.checkMightyClicks();
+                }
             } else {
                 displayShopMessage(`Not enough Points for Mighty Cash! (Cost: ${currentMightyCashCost})`, 'error'); return;
             }
@@ -178,8 +182,8 @@ function buyPowerup(powerupType) {
             if (playerPoints >= cost) {
                 playerPoints -= cost;
                 currentReductionLevel++;
-                localStorage.setItem('gamblingCooldownLevel', currentReductionLevel);
-                localStorage.setItem('gamblingCooldownReduction', currentReductionLevel * 5); // 5s reduction per level
+                localStorage.setItem('gamblingCooldownLevel', currentReductionLevel.toString());
+                localStorage.setItem('gamblingCooldownReduction', (currentReductionLevel * 5).toString()); // 5s reduction per level
                 displayShopMessage('Lucky Charm purchased! Cooldown reduced.', 'success');
             } else {
                 displayShopMessage('Not enough Points for Lucky Charm!', 'error'); return;
@@ -195,10 +199,10 @@ function buyPowerup(powerupType) {
             let cost = interestCosts[currentInterestLevel];
             if (playerPoints >= cost) {
                 playerPoints -= cost;
-                localStorage.setItem('interestRate', rates[currentInterestLevel]);
+                localStorage.setItem('interestRate', rates[currentInterestLevel].toFixed(1));
                 currentInterestLevel++;
-                localStorage.setItem('interestLevel', currentInterestLevel);
-                displayShopMessage(`Golden Goose Upgraded! Rate: ${rates[currentInterestLevel-1]}%`, 'success');
+                localStorage.setItem('interestLevel', currentInterestLevel.toString());
+                displayShopMessage(`Golden Goose Upgraded! Rate: ${rates[currentInterestLevel-1].toFixed(1)}%`, 'success');
                  if (window.parent && typeof window.parent.initializeInterestInterval === 'function') {
                     window.parent.initializeInterestInterval(); // Tell main page to re-init interest
                 } else {
@@ -214,8 +218,9 @@ function buyPowerup(powerupType) {
         }
 
         // --- Update localStorage and Main Game UI ---
+        // These updates are critical and should always happen after a successful purchase
         if (playerPoints !== originalPlayerPoints) {
-            localStorage.setItem('score', playerPoints);
+            localStorage.setItem('score', playerPoints.toString());
             if (window.parent && typeof window.parent.updatePlayerPointsFromShop === 'function') {
                 window.parent.updatePlayerPointsFromShop(playerPoints);
             } else {
@@ -223,7 +228,7 @@ function buyPowerup(powerupType) {
             }
         }
         if (playerCash !== originalPlayerCash) {
-            localStorage.setItem('playerCash', playerCash);
+            localStorage.setItem('playerCash', playerCash.toFixed(1));
             if (window.parent && typeof window.parent.updatePlayerCashFromShop === 'function') {
                 window.parent.updatePlayerCashFromShop(playerCash);
             } else {
@@ -253,8 +258,8 @@ function updateShopUI() {
         if (shopPointsDisplay) shopPointsDisplay.textContent = currentPoints;
         let convCount = getGameVar('conversionCount', 0);
         const baseConvRate = 10;
-        const rateIncPerBlk = 10; // More aggressive increase
-        const convsPerBlk = 8;  // More frequent increase
+        const rateIncPerBlk = 10;
+        const convsPerBlk = 8;
         const currentConvBlk = Math.floor(convCount / convsPerBlk);
         const dynamicRate = baseConvRate + (currentConvBlk * rateIncPerBlk);
 
@@ -262,13 +267,10 @@ function updateShopUI() {
         const currentCashForConversionDisplay = document.getElementById('currentCashForConversion');
         if (currentCashForConversionDisplay) currentCashForConversionDisplay.textContent = currentCash.toFixed(1);
         
-        const conversionRateDisplay = document.getElementById('conversionRateInfo'); // Assuming this ID exists in shop.html
+        const conversionRateDisplay = document.getElementById('conversionRateInfo');
         if (conversionRateDisplay) {
             conversionRateDisplay.innerHTML = `Rate: <strong style="color: #FFD700;">${dynamicRate} Cash</strong> = <strong style="color: #FFFFFF;">1 Point</strong>`;
         }
-
-        const convertBtn = document.getElementById('convertCashToPointsBtn');
-        // No need to disable convertBtn here, handled by amount check in buyPowerup
 
         // Cash Clicker Upgrader
         const clickUpgraderBtn = document.getElementById('buyClickUpgrader');
