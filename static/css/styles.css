@@ -1,50 +1,214 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+/* Using Inter for a modern look, fallback to Ubuntu */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
 body {
-    font-family: Ubuntu, sans-serif;
+    font-family: 'Inter', 'Ubuntu', sans-serif;
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
     min-height: 100vh;
-    /* background-color: #222; */
-    background-image: radial-gradient(circle, darkblue, purple);
+    background-image: radial-gradient(circle at top left, #2a0050, #000000); /* Default dark gradient */
+    color: #ddd; /* Default light gray text */
+    transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transitions */
+}
+
+/* Dark theme specific styles for the main body */
+body.dark-theme {
+    background-image: radial-gradient(circle at top left, #2a0050, #000000); /* Keep dark gradient for dark theme */
     color: #ddd;
 }
-button {
-    cursor: pointer;
+
+/* Light theme specific styles for the main body */
+body.light-theme {
+    background-image: radial-gradient(circle at top left, #a0d9f5, #e0f2f7); /* Lighter gradient for light theme */
+    color: #333; /* Darker text for light theme */
 }
-.container {
+
+
+/* Navigation Bar */
+nav {
+    width: 100%;
+    background-color: #1a1a1a; /* Default dark nav background */
+    color: white;
+    padding: 15px 0;
     text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    transition: background-color 0.5s ease;
 }
 
-.counter {
-    font-size: 5em;
-    margin-bottom: 20px;
+body.light-theme nav {
+    background-color: #f0f0f0; /* Light nav background */
+    color: #333;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
-.clicker {
-    padding: 15px 30px;
-    border: none;
+nav a {
+    color: white; /* Default white link text */
+    text-decoration: none;
+    margin: 0 20px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+    font-weight: 600;
+}
+
+body.light-theme nav a {
+    color: #333; /* Dark link text for light theme */
+}
+
+nav a:hover {
+    background-color: #333;
+    transform: translateY(-2px);
+}
+
+body.light-theme nav a:hover {
+    background-color: #e0e0e0;
+}
+
+
+/* Main Container */
+.container {
+    background-color: #2a2a2a; /* Default dark container background */
+    padding: 40px;
     border-radius: 20px;
-    background: linear-gradient(to right, purple, #ff6600);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    text-align: center;
+    margin-top: 50px;
+    width: 90%;
+    max-width: 550px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+body.light-theme .container {
+    background-color: #ffffff; /* Light container background */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Counters (Cash and Points) */
+.counter {
+    font-size: 3.5em;
+    margin-bottom: 5px;
+    font-weight: 700;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+    letter-spacing: 1px;
+}
+
+body.light-theme .counter {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+#playerPointsDisplay {
+    font-size: 2em;
+    margin-top: 0;
+    opacity: 0.8;
+}
+
+/* Clicker Button */
+.clicker {
+    background: linear-gradient(to right, #6a0dad, #ff6600); /* Vibrant gradient */
     color: #fff;
-    font-size: 1.2em;
+    padding: 18px 35px;
+    font-size: 1.6em;
+    border: none;
+    border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 8px #9933cc;
+    width: 90%;
+    max-width: 350px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+body.light-theme .clicker {
+    background: linear-gradient(to right, #007bff, #00c6ff); /* Lighter gradient for light theme */
+    box-shadow: 0 8px #0056b3;
 }
 
 .clicker:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
+    box-shadow: 0 10px #7b24b3;
+    background: linear-gradient(to right, #7a1edb, #ff7b1a);
 }
 
-.message {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background-color: #ff0000;
-    color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    display: none;
+body.light-theme .clicker:hover {
+    background: linear-gradient(to right, #0069d9, #00ace6);
+    box-shadow: 0 10px #004085;
+}
+
+.clicker:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px #5a0a99;
+}
+
+body.light-theme .clicker:active {
+    box-shadow: 0 2px #004085;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        margin-top: 20px;
+        padding: 20px;
+        width: 95%;
+    }
+    .counter {
+        font-size: 2.8em;
+    }
+    #playerPointsDisplay {
+        font-size: 1.8em;
+    }
+    .clicker {
+        padding: 15px 25px;
+        font-size: 1.4em;
+        width: 95%;
+    }
+    nav a {
+        margin: 0 10px;
+        padding: 6px 12px;
+        font-size: 0.9em;
+    }
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin-top: 15px;
+        padding: 15px;
+    }
+    .counter {
+        font-size: 2.2em;
+    }
+    #playerPointsDisplay {
+        font-size: 1.5em;
+    }
+    .clicker {
+        padding: 12px 20px;
+        font-size: 1.2em;
+        width: 100%;
+    }
+    nav a {
+        margin: 0 5px;
+        padding: 5px 8px;
+        font-size: 0.8em;
+    }
+    .modal-content {
+        padding: 15px;
+    }
 }
