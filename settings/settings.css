@@ -1,0 +1,283 @@
+body {
+    font-family: 'Inter', 'Arial', sans-serif;
+    background-color: #f4f4f4; /* Default light background */
+    color: #333; /* Default light text */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-bottom: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
+}
+
+/* Dark Theme styles */
+body.dark-theme {
+    background-color: #1a1a1a; /* Dark background */
+    color: #d0d0d0; /* Light text */
+}
+
+.settings-container {
+    width: 90%;
+    max-width: 800px;
+    margin-top: 20px;
+    background-color: #fff; /* Default light container background */
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-theme .settings-container {
+    background-color: #2b2b2b; /* Dark container background */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+.settings-header {
+    background-color: #007bff; /* Default blue header */
+    color: #fff;
+    text-align: center;
+    padding: 25px;
+    margin: 0;
+    font-size: 2em;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+body.dark-theme .settings-header {
+    background-color: #6a0dad; /* Dark theme header color */
+}
+
+.tab-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-buttons {
+    background-color: #e9ecef; /* Default light tab button background */
+    display: flex;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-theme .tab-buttons {
+    background-color: #333; /* Dark tab button background */
+    border-bottom-color: #444;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background-color: transparent;
+    color: #555; /* Default light tab text color */
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+body.dark-theme .tab-button {
+    color: #bbb; /* Dark tab text color */
+}
+
+.tab-button:hover:not(.active) {
+    background-color: #f8f9fa; /* Light hover effect */
+    color: #333;
+}
+
+body.dark-theme .tab-button:hover:not(.active) {
+    background-color: #444; /* Dark hover effect */
+    color: #eee;
+}
+
+.tab-button.active {
+    border-bottom: 3px solid #007bff; /* Default active indicator */
+    color: #007bff; /* Default active text color */
+    background-color: #fff; /* Default active tab background */
+}
+
+body.dark-theme .tab-button.active {
+    border-bottom-color: #ff6600; /* Dark theme active indicator */
+    color: #ff6600; /* Dark theme active text color */
+    background-color: #2b2b2b; /* Dark theme active tab background */
+}
+
+.tab-content {
+    padding: 30px;
+    display: none;
+    transition: background-color 0.3s ease;
+}
+
+body.dark-theme .tab-content {
+    background-color: #2b2b2b; /* Dark theme content background */
+}
+
+.tab-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333; /* Default light heading color */
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-theme .tab-content h2 {
+    color: #eee; /* Dark theme heading color */
+    border-bottom-color: #444;
+}
+
+.setting-group {
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 0;
+    color: #555; /* Default light label color */
+    font-weight: 500;
+    font-size: 1.05em;
+    transition: color 0.3s ease;
+}
+
+body.dark-theme .setting-group label {
+    color: #bbb; /* Dark theme label color */
+}
+
+.setting-group input[type="number"],
+.setting-group select,
+.setting-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc; /* Default light border */
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    color: #333; /* Default light input text */
+    background-color: #fdfdfd; /* Default light input background */
+    transition: all 0.3s ease;
+}
+
+body.dark-theme .setting-group input[type="number"],
+body.dark-theme .setting-group select,
+body.dark-theme .setting-group textarea {
+    background-color: #3a3a3a; /* Dark input background */
+    border-color: #555; /* Dark input border */
+    color: #eee; /* Dark input text */
+}
+
+.setting-group input[type="number"]:focus,
+.setting-group select:focus,
+.setting-group textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+body.dark-theme .setting-group input[type="number"]:focus,
+body.dark-theme .setting-group select:focus,
+body.dark-theme .setting-group textarea:focus {
+    border-color: #ff6600; /* Dark theme focus color */
+    box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.25);
+}
+
+.setting-group input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+.settings-actions {
+    background-color: #f8f9fa; /* Default light actions background */
+    padding: 25px 30px;
+    text-align: right;
+    border-top: 1px solid #dee2e6;
+    transition: background-color 0.3s ease, border-top-color 0.3s ease;
+}
+
+body.dark-theme .settings-actions {
+    background-color: #333; /* Dark actions background */
+    border-top-color: #444;
+}
+
+.settings-actions button {
+    padding: 12px 25px;
+    border: none;
+    background-color: #007bff; /* Default primary blue */
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-left: 15px;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px #0056b3;
+}
+
+body.dark-theme .settings-actions button {
+    background-color: #ff6600; /* Dark theme button color */
+    box-shadow: 0 3px #cc5200;
+}
+
+.settings-actions button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px #004085;
+}
+
+body.dark-theme .settings-actions button:hover {
+    background-color: #cc5200;
+    box-shadow: 0 5px #993d00;
+}
+
+.settings-actions button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px #004085;
+}
+
+body.dark-theme .settings-actions button:active {
+    box-shadow: 0 1px #993d00;
+}
+
+/* Responsive adjustments for settings */
+@media (max-width: 768px) {
+    .settings-container {
+        width: 95%;
+        margin-top: 10px;
+    }
+    .settings-header {
+        padding: 20px;
+        font-size: 1.8em;
+    }
+    .tab-button {
+        padding: 12px 15px;
+        font-size: 1em;
+    }
+    .tab-content {
+        padding: 20px;
+    }
+    .tab-content h2 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+    }
+    .settings-actions {
+        padding: 20px;
+        text-align: center;
+    }
+    .settings-actions button {
+        margin: 10px 5px;
+        width: calc(50% - 20px);
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-actions button {
+        width: 90%;
+        margin: 10px auto;
+        display: block;
+    }
+}
