@@ -38,6 +38,15 @@ document.addEventListener('contextmenu', function(event) {
 
 // Prevent key events (allow some for dev/accessibility)
 document.addEventListener('keydown', function(event) {
+    // Get a reference to the reset confirmation modal
+    const resetConfirmModal = document.getElementById('resetConfirmModal');
+
+    // FIX: If the reset confirmation modal is open, allow all key presses
+    if (resetConfirmModal && resetConfirmModal.style.display === 'flex') {
+        return; // Do not prevent default for any key when the reset modal is open
+    }
+
+    // Existing anti-cheat key blocking logic
     if (isAnticheatModalOpen && event.key !== 'Escape') { // Allow Esc to potentially close modal if we add that later
         event.preventDefault();
         return;
