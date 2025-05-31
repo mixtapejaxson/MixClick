@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to load settings from localStorage
     function loadSettings() {
         // Correctly parse boolean values from localStorage
-        const theme = localStorage.getItem('theme') || 'light';
+        // FIX: Changed default theme to 'dark'
+        const theme = localStorage.getItem('theme') || 'dark';
         // Checkboxes should be true if localStorage item is 'true'
         const fullscreen = localStorage.getItem('fullscreen') === 'true';
         const autosaveInterval = localStorage.getItem('autosaveInterval') || '60';
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function applySettingsToGame() {
         let settings = {};
-        settings.theme = localStorage.getItem('theme') || 'light';
+        settings.theme = localStorage.getItem('theme') || 'dark'; // FIX: Changed default theme to 'dark'
         // Correctly parse boolean values for sending to parent
         settings.fullscreen = localStorage.getItem('fullscreen') === 'true';
         settings.notificationDisplayTime = parseFloat(localStorage.getItem('notificationDisplayTime')) || 5;
