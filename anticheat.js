@@ -3,9 +3,12 @@ const anticheatConfig = {
     rightClickMessage: 'ANTICHEAT: Right-click Context Menu Blocked!',
     keyEventMessage: 'ANTICHEAT: Key events blocked!',
     allowedKeys: ['F5', 'Ctrl', 'Shift', 'Tab'], // Added Tab for accessibility, kept dev keys
-    autoclickDetectionIntervalMs: 85, // Time window in ms to detect clicks
-    autoclickMaxClicksInInterval: 2,   // Number of clicks within the interval to trigger a warning
     warningsBeforeReset: 5, // Number of warnings before progress is reset
+
+    // Dynamic Autoclick Detection (Tune these carefully!)
+    autoclickMinIntervalMs: 50,           // Minimum legitimate time (ms) expected between clicks. Anything faster is suspicious.
+    autoclickConsistencyThresholdMs: 10,  // How close (ms) consecutive click intervals need to be to be considered "consistent".
+    autoclickCheckCount: 4,               // Number of *consecutive intervals* to check for consistency. (Requires autoclickCheckCount + 1 clicks)
 
     // Value Integrity Checks (Tune these carefully!)
     valueCheckIntervalMs: 3000,           // How often (ms) to check player cash/points values
@@ -41,7 +44,7 @@ document.addEventListener('keydown', function(event) {
     // Get a reference to the reset confirmation modal
     const resetConfirmModal = document.getElementById('resetConfirmModal');
 
-    // FIX: If the reset confirmation modal is open, allow all key presses
+    // If the reset confirmation modal is open, allow all key presses
     if (resetConfirmModal && resetConfirmModal.style.display === 'flex') {
         return; // Do not prevent default for any key when the reset modal is open
     }
@@ -84,24 +87,52 @@ document.addEventListener('click', function(event) {
     }
 
     clickTimestamps.push(currentTime);
-    // Filter out old timestamps
-    clickTimestamps = clickTimestamps.filter(timestamp => currentTime - timestamp < anticheatConfig.autoclickDetectionIntervalMs);
 
-    // If rapid clicking detected
-    if (clickTimestamps.length >= anticheatConfig.autoclickMaxClicksInInterval) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+    // Keep only the last N+1 timestamps needed for N intervals
+    const requiredTimestamps = anticheatConfig.autoclickCheckCount + 1;
+    if (clickTimestamps.length > requiredTimestamps) {
+        clickTimestamps.shift(); // Remove the oldest timestamp
+    }
 
-        warningCounter++;
-        console.warn(`ANTICHEAT: Rapid clicking detected (${clickTimestamps.length} clicks in interval). Warning ${warningCounter}/${anticheatConfig.warningsBeforeReset}`);
+    // Only proceed if we have enough click timestamps to form the required number of intervals
+    if (clickTimestamps.length === requiredTimestamps) {
+        let allConsistent = true;
+        
+        // Start checking from the second click to form the first interval
+        for (let i = 1; i < clickTimestamps.length; i++) {
+            const currentInterval = clickTimestamps[i] - clickTimestamps[i-1];
 
-        clickTimestamps = []; // Reset timestamps after detection
+            // Check if the current interval is too fast
+            if (currentInterval > anticheatConfig.autoclickMinIntervalMs) {
+                allConsistent = false;
+                break; // Not consistently fast enough
+            }
 
-        if (warningCounter >= anticheatConfig.warningsBeforeReset) {
-            triggerProgressReset();
-        } else {
-            const remainingWarnings = anticheatConfig.warningsBeforeReset - warningCounter;
-            showAutoclickWarningModal(remainingWarnings);
+            // If not the very first interval, check consistency with the previous one
+            if (i > 1) {
+                const previousInterval = clickTimestamps[i-1] - clickTimestamps[i-2];
+                if (Math.abs(currentInterval - previousInterval) > anticheatConfig.autoclickConsistencyThresholdMs) {
+                    allConsistent = false;
+                    break; // Not consistent enough
+                }
+            }
+        }
+
+        if (allConsistent) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            warningCounter++;
+            console.warn(`ANTICHEAT: Dynamic autoclick detected! Warning ${warningCounter}/${anticheatConfig.warningsBeforeReset}`);
+
+            clickTimestamps = []; // Reset timestamps after detection
+
+            if (warningCounter >= anticheatConfig.warningsBeforeReset) {
+                triggerProgressReset();
+            } else {
+                const remainingWarnings = anticheatConfig.warningsBeforeReset - warningCounter;
+                showAutoclickWarningModal(remainingWarnings);
+            }
         }
     }
 }, true); // Use capture phase to ensure it runs before other click handlers
