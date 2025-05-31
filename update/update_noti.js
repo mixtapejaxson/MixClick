@@ -1,7 +1,7 @@
 async function checkAndUpdateReleaseNotes() {
   const repoOwner = 'mixtapejaxson'; 
   const repoName = 'MixClick'; 
-  const currentVersion = '1.0.2'; 
+  const currentVersion = '1.0.0'; 
 
   // Function to fetch the latest release notes from GitHub API
   async function fetchLatestReleaseNotes(repoOwner, repoName) {
