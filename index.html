@@ -6,23 +6,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MixClick</title>
     <link rel="stylesheet" href="static/css/styles.css">
-    <link rel="stylesheet" href="update/updateModal.css">
+    <link rel="stylesheet" href="update/updateModal.css"> 
     <script src="save.js"></script>
     <script src="gambling.js"></script>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <style>
+        /* Styles for scrollbar hiding in iframes */
+        #settingsFrame::-webkit-scrollbar,
+        #shopFrame::-webkit-scrollbar {
+            display: none;
+        }
+
+        #settingsFrame,
+        #shopFrame {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Modal styles - Centralized for all modals */
+        .modal {
+            display: none; /* Hidden by default - FIX: Removed conflicting display:flex here */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top of most content */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Darker overlay for better focus */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+            animation: fadeIn 0.3s ease-out; /* Smooth fade-in */
+        }
+
+        .modal-content {
+            background-color: #2b2b2b; /* Slightly lighter than body background for contrast */
+            padding: 30px; /* Increased padding */
+            border: 1px solid #444; /* Darker border */
+            width: 90%; /* Responsive width */
+            max-width: 600px; /* Max width for larger screens */
+            border-radius: 12px; /* More rounded corners */
+            position: relative;
+            color: #ddd; /* Ensuring text color matches theme */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5); /* More prominent shadow */
+            animation: slideIn 0.4s ease-out; /* Slide-in animation */
+        }
+
+        /* Animations for modals */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 32px; /* Larger close button */
+            font-weight: bold;
+            position: absolute; /* Position relative to modal-content */
+            top: 10px;
+            right: 20px;
+            transition: color 0.2s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #fff; /* Brighter on hover */
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Message box styles (for general game messages) */
+        .message {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 25px; /* Slightly larger padding */
+            border-radius: 8px; /* More rounded */
+            z-index: 1001; /* Above modals */
+            opacity: 0.95; /* Slightly less transparent */
+            font-size: 1.1em;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Subtle shadow */
+            transition: all 0.3s ease-out;
+        }
+
+        /* Custom Reset Confirmation Modal styles */
+        #resetConfirmModal .modal-content {
+            background-color: #4a1c1c; /* Dark red for warning */
+            border-color: #8b0000;
+        }
+        #resetConfirmModal h2 {
+            color: #ffcccc;
+        }
+        #resetConfirmModal p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        #resetConfirmModal .reset-buttons button {
+            background-color: #dc3545; /* Red for confirm */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            transition: background-color 0.2s ease;
+        }
+        #resetConfirmModal .reset-buttons button:hover {
+            background-color: #c82333;
+        }
+        #resetConfirmModal .reset-buttons button.cancel {
+            background-color: #6c757d; /* Gray for cancel */
+        }
+        #resetConfirmModal .reset-buttons button.cancel:hover {
+            background-color: #5a6268;
+        }
+    </style>
 </head>
 <body>
- 
-    <div class="container">
-        <h1 id="playerCashDisplay" class="counter" style="color: #FFD700; margin-bottom: 0px;">Cash: 0</h1>
-        <h2 id="playerPointsDisplay" class="counter" style="color: #FFFFFF; font-size: 2.5em; margin-top: 0px;">Points: 0</h2>
-        <br>
-        <button class="clicker" id="clickerBtn">Click Me!</button><br><br>
-        <button class="clicker" id="openShopBtn">Open Shop</button><br><br>
-        <button class="clicker" id="luckyBtn">I'm Feeling Lucky</button><br><br>
-        <button class="clicker" id="loadBtn" onclick="loadProgress()">Load Game</button><br><br>
-        <button class="clicker" id="saveBtn" onclick="saveProgress()">Save Game</button><br><br>
-        <button class="clicker" id="resetBtn" onclick="confirmReset()">Reset Game</button><br><br>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="#" id="openSettingsBtn">Settings</a>
+        <a href="https://github.com/mixtapejaxson/MixClick/" target="_blank">GitHub</a>
+    </nav>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeSettingsModal()">&times;</span>
+            <h2>Settings</h2>
+            <iframe id="settingsFrame" src="settings/settings.html" style="width:100%; height:600px; border:none;"></iframe>
+        </div>
     </div>
 
     <div id="shopModal" class="modal">
@@ -33,306 +156,374 @@
         </div>
     </div>
 
+    <div id="resetConfirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeResetConfirmModal()">&times;</span>
+            <h2>WARNING: Reset Game!</h2>
+            <p>This will delete your save file and start over. Are you sure you want to proceed?</p>
+            <p>To confirm, type "RESET" below:</p>
+            <input type="text" id="resetConfirmationInput" style="width: 80%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #666; background-color: #333; color: #eee;">
+            <div class="reset-buttons">
+                <button class="confirm" onclick="performReset()">Confirm Reset</button>
+                <button class="cancel" onclick="closeResetConfirmModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 id="playerCashDisplay" class="counter" style="color: #FFD700; margin-bottom: 0px;">Cash: 0.0</h1>
+        <h2 id="playerPointsDisplay" class="counter" style="color: #FFFFFF; font-size: 2.5em; margin-top: 0px;">Points: 0</h2>
+        <br>
+        <button class="clicker" id="clickerBtn">Click Me!</button><br><br>
+        <button class="clicker" id="openShopBtn">Open Shop</button><br><br>
+        <button class="clicker" id="luckyBtn">I'm Feeling Lucky</button><br><br>
+        <button class="clicker" id="loadBtn" onclick="loadProgress()">Load Game</button><br><br>
+        <button class="clicker" id="saveBtn" onclick="saveProgress()">Save Game</button><br><br>
+        <button class="clicker" id="resetBtn" onclick="openResetConfirmModal()">Reset Game</button><br><br>
+    </div>
+
     <div class="message" id="message"></div>
 
-    <style>
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.4); 
-        }
-
-        .modal-content {
-            background-color: #2b2b2b; /* Slightly lighter than body background for contrast */
-            margin: 10% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; 
-            max-width: 600px;
-            border-radius: 10px;
-            position: relative;
-            color: #ddd; /* Ensuring text color matches theme */
-        }
-
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close-button:hover,
-        .close-button:focus {
-            color: #fff; /* Brighter on hover */
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
-
     <script>
-        // DOM Elements
-        const playerCashDisplayEl = document.getElementById('playerCashDisplay'); // Was clicksDisplayEl
-        const playerPointsDisplayEl = document.getElementById('playerPointsDisplay'); // Was cashDisplayEl
-        const clickerBtn = document.getElementById('clickerBtn');
-        const luckyBtn = document.getElementById('luckyBtn');
-        const messageEl = document.getElementById('message');
-        const openShopBtn = document.getElementById('openShopBtn');
-        const shopModal = document.getElementById('shopModal');
-        const shopFrame = document.getElementById('shopFrame');
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const playerCashDisplayEl = document.getElementById('playerCashDisplay');
+            const playerPointsDisplayEl = document.getElementById('playerPointsDisplay');
+            const clickerBtn = document.getElementById('clickerBtn');
+            const luckyBtn = document.getElementById('luckyBtn');
+            const messageEl = document.getElementById('message');
+            const openShopBtn = document.getElementById('openShopBtn');
+            const shopModal = document.getElementById('shopModal');
+            const shopFrame = document.getElementById('shopFrame');
 
-        // Game Variables (will be loaded by save.js -> loadProgress)
-        var playerCash = 0.0;     // Earned by clicking (Top, Orange Display)
-        var playerPoints = 0;   // Currency for shop (Bottom, White Display)
-        var clickValue = 0.25;     // How much playerCash is generated per click action
-        var upgradeCost = 10;   // Cost in playerPoints (for clickValue upgrader in shop)
-        var upgradeMultiplier = 2;
-        var upgradeLevel = 1;
+            const openSettingsBtn = document.getElementById('openSettingsBtn');
+            const settingsModal = document.getElementById('settingsModal');
+            const settingsFrame = document.getElementById('settingsFrame');
 
-        // --- Shop Modal Logic ---
-        openShopBtn.addEventListener('click', () => {
-            localStorage.setItem('playerCash', playerCash.toString()); // Pass current playerCash for shop conversion
-            localStorage.setItem('score', playerPoints.toString());    // Pass current playerPoints for shop purchases (shop calls it 'score')
-            shopModal.style.display = "block";
-            document.body.style.overflow = 'hidden'; // Hide main window scrollbar
-        });
-        
-        // Called by shop.js after it changes playerPoints (e.g. purchase)
-        window.updatePlayerPointsFromShop = function(newPointsValue) {
-            console.log('updatePlayerPointsFromShop called with:', newPointsValue);
-            playerPoints = parseInt(newPointsValue) || 0;
-            // Ensure the display element exists before updating
-            if (playerPointsDisplayEl) {
-                playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
-                console.log('Player points display updated to:', playerPoints);
-            } else {
-                console.error('playerPointsDisplayEl not found!');
-            }
-        };
+            const resetConfirmModal = document.getElementById('resetConfirmModal');
+            const resetConfirmationInput = document.getElementById('resetConfirmationInput');
 
-        // Called by shop.js after it changes playerCash (e.g. conversion)
-        window.updatePlayerCashFromShop = function(newCashValue) {
-            console.log('updatePlayerCashFromShop called with:', newCashValue);
-            playerCash = parseFloat(newCashValue) || 0.0;
-            // Ensure the display element exists before updating
-            if (playerCashDisplayEl) {
-                playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
-                 console.log('Player cash display updated to:', playerCash.toFixed(1));
-            } else {
-                console.error('playerCashDisplayEl not found!');
-            }
-        };
+            // Game Variables (initialized from localStorage or defaults)
+            // Ensure these are globally accessible for anticheat.js and save.js
+            window.playerCash = parseFloat(localStorage.getItem('playerCash')) || 0.0;
+            window.playerPoints = parseInt(localStorage.getItem('score')) || 0; // 'score' is used for points in localStorage
+            window.clickValue = parseFloat(localStorage.getItem('clickValue')) || 0.25;
+            window.upgradeLevel = parseInt(localStorage.getItem('upgradeLevel')) || 1;
+            window.upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10;
+            let notificationDisplayTime = parseFloat(localStorage.getItem('notificationDisplayTime')) || 5;
 
-        function closeShopModal() {
-            shopModal.style.display = "none";
-            document.body.style.overflow = 'auto'; // Restore main window scrollbar
-            // Potentially refresh main page data if shop made changes not communicated back
-            // For now, localStorage is the main sync point.
-        }
+            // Intervals
+            let mightyClicksInterval = null;
+            let interestInterval = null;
+            let autoClickerInterval = null; // Added for clarity
 
-        window.onclick = function(event) {
-            if (event.target == shopModal) {
-                closeShopModal();
-            }
-        };
-        
-        // Function for shop.js to update click upgrader related variables in index.html
-        window.updateClickUpgraderStats = function(newClickValue, newUpgradeLevel, newUpgradeCost) {
-            clickValue = parseInt(newClickValue) || 1;
-            upgradeLevel = parseInt(newUpgradeLevel) || 1;
-            upgradeCost = parseInt(newUpgradeCost) || 10;
-            console.log(`Upgrader stats updated by shop: CV=${clickValue}, UL=${upgradeLevel}, UC=${upgradeCost}`);
-            // No UI element for upgrader directly in index.html anymore to update, 
-            // but these vars are used by applyClickBoost.
-        };
+            // Initial UI update
+            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${window.playerCash.toFixed(1)}`;
+            if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${window.playerPoints}`;
 
-        // --- Core Game Actions ---
-        clickerBtn.addEventListener('click', () => {
-            const generatedPlayerCash = applyClickBoost(); // applyClickBoost now returns amount of playerCash
-            playerCash += generatedPlayerCash;
-            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
-            // Update localStorage for the shop to see current playerCash if it needs to
-            localStorage.setItem('playerCash', playerCash.toString()); // Save full precision
-            checkMightyClicks(); 
-        });
+            // --- Settings Modal Logic ---
+            openSettingsBtn.addEventListener('click', () => {
+                settingsModal.style.display = "flex"; // Use flex to center
+                document.body.style.overflow = 'hidden'; // Hide main window scrollbar
+            });
 
-        // convertClicksBtn and its listener are removed.
-    
-        // updateCounter function is no longer directly used for main score.
-        // Auto-clicker and Interest have their own interval logic.
+            window.closeSettingsModal = function() {
+                settingsModal.style.display = "none";
+                document.body.style.overflow = 'auto'; // Restore main window scrollbar
+            };
 
-        function showMessage(text) {
-            messageEl.textContent = text;
-            messageEl.style.display = 'block';
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 5000);
-        }
+            // --- Shop Modal Logic ---
+            openShopBtn.addEventListener('click', () => {
+                // Save current progress before opening shop to ensure shop has latest values
+                localStorage.setItem('playerCash', window.playerCash.toFixed(1));
+                localStorage.setItem('score', window.playerPoints.toString());
+                shopModal.style.display = "flex"; // Use flex to center
+                document.body.style.overflow = 'hidden'; // Hide main window scrollbar
+                // Reload shop iframe content to ensure it reflects latest data
+                if (shopFrame) shopFrame.contentWindow.location.reload(true);
+            });
 
-        function confirmReset() {
-            const answer = prompt("WARNING: THIS WILL DELETE YOUR SAVE FILE AND START OVER!!To confirm the reset, what is the result of 100 + 5?");
-            if (answer === "105") {
-                resetGame();
-            } else {
-                showMessage("Incorrect answer. Reset not confirmed.");
-            }
-        }
-
-        function resetGame() {
-            playerCash = 0;
-            playerPoints = 0;
-            clickValue = 0.25; 
-            upgradeLevel = 1;
-            upgradeCost = 10; 
-
-            if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
-            if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
-
-            // Reset ALL relevant localStorage items
-            const itemsToClear = [
-                'doubleClick', 'autoClicker', 'clickBoostActive', 'clickBoostEndTime',
-                'gamblingCooldownLevel', 'gamblingCooldownReduction', 
-                'interestLevel', 'interestRate', 
-                'score',          // This was playerPoints for the shop
-                'playerCash',     // This is the new item for earned cash
-                'clickValue', 'upgradeLevel', 'upgradeCost', 
-                'progress'        // The main save file
-            ];
-            itemsToClear.forEach(item => localStorage.removeItem(item));
-            
-            // Explicitly set initial values for shop after clearing, so shop doesn't see null/undefined before first save
-            localStorage.setItem('playerCash', '0');
-            localStorage.setItem('score', '0'); 
-
-            // Clear intervals for power-ups
-            if (mightyClicksInterval) { clearInterval(mightyClicksInterval); mightyClicksInterval = null; }
-            if (interestInterval) { clearInterval(interestInterval); interestInterval = null; }
-            // Auto-clicker interval is anonymous, will stop checking localStorage once 'autoClicker' is removed.
-
-            showMessage("Game reset successfully!");
-        }
-        
-        // --- Powerup Integration --- 
-        // (applyClickBoost, checkMightyClicks, and Mighty Clicks interval setup remain largely the same)
-        // (Auto Clicker and Golden Goose Interest logic need to be adjusted for clicks/cash)
-        // TODO: Add later
-
-        let mightyClicksInterval = null; // For clickBoost
-        let interestInterval = null;   // For Golden Goose
-
-        function applyClickBoost() {
-            let boostedValue = clickValue;
-            if (localStorage.getItem('doubleClick') === 'true') {
-                boostedValue *= 2;
-            }
-            if (localStorage.getItem('clickBoostActive') === 'true') {
-                boostedValue *= 3;
-            }
-            return boostedValue;
-        }
-
-        // Check and manage Mighty Clicks boost duration
-        function checkMightyClicks() {
-            const boostActive = localStorage.getItem('clickBoostActive') === 'true';
-            if (boostActive) {
-                const endTime = parseInt(localStorage.getItem('clickBoostEndTime'));
-                if (Date.now() >= endTime) {
-                    localStorage.removeItem('clickBoostActive');
-                    localStorage.removeItem('clickBoostEndTime');
-                    showMessage("Mighty Clicks expired!", "orange");
-                    if (mightyClicksInterval) clearInterval(mightyClicksInterval);
-                    mightyClicksInterval = null;
+            window.updatePlayerPointsFromShop = function(newPointsValue) {
+                console.log('updatePlayerPointsFromShop called with:', newPointsValue);
+                window.playerPoints = parseInt(newPointsValue) || 0;
+                if (playerPointsDisplayEl) {
+                    playerPointsDisplayEl.textContent = `Points: ${window.playerPoints}`;
+                    console.log('Player points display updated to:', window.playerPoints);
                 } else {
-                    // If interval not set, set it (e.g. on page load)
-                    if (!mightyClicksInterval) {
-                         mightyClicksInterval = setInterval(checkMightyClicks, 1000);
-                    }
+                    console.error('playerPointsDisplayEl not found!');
                 }
-            }
-        }
-        // Initial check and start interval if active on load
-        checkMightyClicks();
-        if (localStorage.getItem('clickBoostActive') === 'true' && !mightyClicksInterval) {
-            mightyClicksInterval = setInterval(checkMightyClicks, 1000);
-        }
+                localStorage.setItem('score', window.playerPoints.toString()); // Ensure localStorage is updated
+            };
 
-        // applyClickBoost function (determines clicks per action, including boosts)
-        // (This function should be defined before its first use by auto-clicker or manual click)
-        function applyClickBoost() {
-            let boostedClickValue = clickValue; // Start with base clickValue (from upgrades)
-            if (localStorage.getItem('doubleClick') === 'true') {
-                boostedClickValue *= 2;
-            }
-            if (localStorage.getItem('clickBoostActive') === 'true') {
-                boostedClickValue *= 3; // Mighty Clicks boost
-            }
-            return boostedClickValue;
-        }
-        
-        // Check and manage Mighty Clicks boost duration
-        // (Function definition for checkMightyClicks remains as it was, no changes needed for clicks/cash separation)
-        function checkMightyClicks() {
-            const boostActive = localStorage.getItem('clickBoostActive') === 'true';
-            if (boostActive) {
-                const endTime = parseInt(localStorage.getItem('clickBoostEndTime'));
-                if (Date.now() >= endTime) {
-                    localStorage.removeItem('clickBoostActive');
-                    localStorage.removeItem('clickBoostEndTime');
-                    showMessage("Mighty Clicks expired!", "orange");
-                    if (mightyClicksInterval) { clearInterval(mightyClicksInterval); mightyClicksInterval = null; }
+            window.updatePlayerCashFromShop = function(newCashValue) {
+                console.log('updatePlayerCashFromShop called with:', newCashValue);
+                window.playerCash = parseFloat(newCashValue) || 0.0;
+                if (playerCashDisplayEl) {
+                    playerCashDisplayEl.textContent = `Cash: ${window.playerCash.toFixed(1)}`;
+                    console.log('Player cash display updated to:', window.playerCash.toFixed(1));
                 } else {
-                    if (!mightyClicksInterval) { // If interval not set (e.g. on page load with active boost)
-                         mightyClicksInterval = setInterval(checkMightyClicks, 1000);
-                    }
+                    console.error('playerCashDisplayEl not found!');
                 }
-            }
-        }
-        // Initial check for Mighty Clicks on load
-        checkMightyClicks();
+                localStorage.setItem('playerCash', window.playerCash.toFixed(1)); // Ensure localStorage is updated
+            };
 
+            window.closeShopModal = function() {
+                shopModal.style.display = "none";
+                document.body.style.overflow = 'auto'; // Restore main window scrollbar
+            };
 
-        // Auto Clicker (from shop) - generates playerCash
-        setInterval(() => {
-            if (localStorage.getItem('autoClicker') === 'true') {
+            // --- Custom Reset Confirmation Modal Logic ---
+            window.openResetConfirmModal = function() {
+                resetConfirmModal.style.display = "flex";
+                document.body.style.overflow = 'hidden';
+                resetConfirmationInput.value = ''; // Clear input field
+                resetConfirmationInput.focus(); // Focus for user input
+            };
+
+            window.closeResetConfirmModal = function() {
+                resetConfirmModal.style.display = "none";
+                document.body.style.overflow = 'auto';
+            };
+
+            window.performReset = function() {
+                const confirmationText = resetConfirmationInput.value.trim();
+                if (confirmationText === "RESET") {
+                    window.resetGame(); // Call the actual reset game function
+                    closeResetConfirmModal();
+                } else {
+                    showMessage("Incorrect confirmation text. Reset not performed.", 'red');
+                }
+            };
+
+            // FIX: Consolidated window.onclick to handle all modals
+            window.onclick = function(event) {
+                if (event.target == settingsModal) {
+                    closeSettingsModal();
+                }
+                if (event.target == shopModal) {
+                    closeShopModal();
+                }
+                if (event.target == resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            };
+
+            window.updateClickUpgraderStats = function(newClickValue, newUpgradeLevel, newUpgradeCost) {
+                // FIX: Use parseFloat for clickValue as it's a decimal
+                window.clickValue = parseFloat(newClickValue) || 1;
+                window.upgradeLevel = parseInt(newUpgradeLevel) || 1;
+                window.upgradeCost = parseInt(newUpgradeCost) || 10;
+                console.log(`Upgrader stats updated by shop: CV=${window.clickValue}, UL=${window.upgradeLevel}, UC=${window.upgradeCost}`);
+                // Also update localStorage for consistency
+                localStorage.setItem('clickValue', window.clickValue.toFixed(2));
+                localStorage.setItem('upgradeLevel', window.upgradeLevel.toString());
+                localStorage.setItem('upgradeCost', window.upgradeCost.toString());
+            };
+
+            clickerBtn.addEventListener('click', () => {
                 const generatedPlayerCash = applyClickBoost();
-                playerCash += generatedPlayerCash;
-                if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${playerCash.toFixed(1)}`;
-                localStorage.setItem('playerCash', playerCash.toString()); // Update for shop, save full precision
-            }
-        }, 1000);
+                window.playerCash += generatedPlayerCash;
+                if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${window.playerCash.toFixed(1)}`;
+                localStorage.setItem('playerCash', window.playerCash.toFixed(1));
+                checkMightyClicks(); // Re-check mighty clicks status after a click
+            });
 
-        // Golden Goose Interest (from shop) - generates playerPoints based on playerPoints
-        function applyInterest() {
-            const currentInterestRate = parseFloat(localStorage.getItem('interestRate'));
-            if (currentInterestRate && currentInterestRate > 0) {
-                const earnings = Math.floor(playerPoints * (currentInterestRate / 100)); // Interest on playerPoints
-                if (earnings > 0) {
-                    playerPoints += earnings;
-                    if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${playerPoints}`;
-                    localStorage.setItem('score', playerPoints); // Update 'score' (playerPoints)
-                    console.log(`${earnings} Points earned from interest!`);
+            // FIX: Added optional color parameter to showMessage
+            window.showMessage = function(text, color = 'white') {
+                messageEl.textContent = text;
+                // Set background color based on type
+                if (color === 'red') messageEl.style.backgroundColor = '#dc3545';
+                else if (color === 'green') messageEl.style.backgroundColor = '#28a745';
+                else if (color === 'orange') messageEl.style.backgroundColor = '#fd7e14';
+                else messageEl.style.backgroundColor = '#333'; // Default dark gray
+
+                messageEl.style.display = 'block';
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, notificationDisplayTime * 1000); // notificationDisplayTime is already a number
+            };
+
+            window.resetGame = function() {
+                window.playerCash = 0.0;
+                window.playerPoints = 0;
+                window.clickValue = 0.25;
+                window.upgradeLevel = 1;
+                window.upgradeCost = 10;
+
+                if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${window.playerCash.toFixed(1)}`;
+                if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${window.playerPoints}`;
+
+                // Clear all relevant localStorage items
+                const itemsToClear = [
+                    'doubleClick', 'autoClicker', 'clickBoostActive', 'clickBoostEndTime',
+                    'gamblingCooldownLevel', 'gamblingCooldownReduction',
+                    'interestLevel', 'interestRate',
+                    'score', // PlayerPoints for the shop
+                    'playerCash', // Earned cash
+                    'clickValue', 'upgradeLevel', 'upgradeCost',
+                    'progress', // Main save file
+                    'conversionCount', 'mightyCashPurchaseCount', // Dynamic shop trackers
+                    // Settings related items (ensure they are reset to defaults or cleared)
+                    'theme', 'fullscreen', 'autosaveInterval', 'disableAutoclickDetection',
+                    'notificationDisplayTime', 'idleCashMultiplier', 'showDevTools',
+                    'currencyFormat', 'customCSS', 'showElementIds',
+                    'backgroundColor', 'fontFamily', 'textColor' // Custom style settings
+                ];
+                itemsToClear.forEach(item => localStorage.removeItem(item));
+
+                // Re-initialize default values in localStorage for critical items
+                localStorage.setItem('playerCash', '0.0');
+                localStorage.setItem('score', '0');
+                localStorage.setItem('clickValue', '0.25');
+                localStorage.setItem('upgradeLevel', '1');
+                localStorage.setItem('upgradeCost', '10');
+                localStorage.setItem('conversionCount', '0');
+                localStorage.setItem('mightyCashPurchaseCount', '0');
+
+                // Reset visual styles to default
+                document.body.classList.remove('dark-theme'); // Ensure light theme is default after reset
+                document.body.classList.add('light-theme'); // Explicitly set light theme
+                document.body.style.backgroundColor = ''; // Clear inline style
+                document.body.style.fontFamily = ''; // Clear inline style
+                document.body.style.color = ''; // Clear inline style
+
+
+                // Clear intervals if they are running
+                if (mightyClicksInterval) { clearInterval(mightyClicksInterval); mightyClicksInterval = null; }
+                if (interestInterval) { clearInterval(interestInterval); interestInterval = null; }
+                if (autoClickerInterval) { clearInterval(autoClickerInterval); autoClickerInterval = null; }
+
+
+                // Re-initialize game components that depend on localStorage
+                initializeInterestInterval(); // Re-initialize interest if applicable
+                checkMightyClicks(); // Re-initialize mighty clicks check
+                initializeAutoClicker(); // Re-initialize auto clicker
+                
+                // Initialize anticheat value checks with reset values
+                if (typeof window.antiCheatInitializeValueChecks === 'function') {
+                    window.antiCheatInitializeValueChecks(window.playerCash, window.playerPoints);
                 }
-            }
-        }
-        
-        function initializeInterestInterval() {
-            if (interestInterval) { clearInterval(interestInterval); interestInterval = null; }
-            const currentInterestRate = parseFloat(localStorage.getItem('interestRate'));
-            if (currentInterestRate && currentInterestRate > 0) {
-                 interestInterval = setInterval(applyInterest, 10000);
-                 console.log("Interest interval initialized. Rate: " + currentInterestRate + "%");
-            } else {
-                 console.log("Interest interval not started (no active interest upgrade).");
-            }
-        }
-        initializeInterestInterval();
 
+                showMessage("Game reset successfully!", 'green');
+            };
+
+            // Function to apply click boost (defined globally for access by clickerBtn and auto-clicker)
+            window.applyClickBoost = function() {
+                let boostedValue = window.clickValue;
+                if (localStorage.getItem('doubleClick') === 'true') {
+                    boostedValue *= 2;
+                }
+                if (localStorage.getItem('clickBoostActive') === 'true') {
+                    boostedValue *= 3;
+                }
+                return boostedValue;
+            };
+
+            // Function to check Mighty Clicks status (defined globally)
+            window.checkMightyClicks = function() {
+                const boostActive = localStorage.getItem('clickBoostActive') === 'true';
+                if (boostActive) {
+                    const endTime = parseInt(localStorage.getItem('clickBoostEndTime'));
+                    if (Date.now() >= endTime) {
+                        localStorage.removeItem('clickBoostActive');
+                        localStorage.removeItem('clickBoostEndTime');
+                        showMessage("Mighty Clicks expired!", "orange");
+                        if (mightyClicksInterval) { clearInterval(mightyClicksInterval); mightyClicksInterval = null; }
+                    } else {
+                        // Only set interval if not already running
+                        if (!mightyClicksInterval) {
+                            mightyClicksInterval = setInterval(window.checkMightyClicks, 1000);
+                        }
+                    }
+                } else {
+                    // If boost is not active, ensure interval is cleared
+                    if (mightyClicksInterval) { clearInterval(mightyClicksInterval); mightyClicksInterval = null; }
+                }
+            };
+
+            // Function to initialize auto-clicker (defined globally)
+            window.initializeAutoClicker = function() {
+                if (autoClickerInterval) { clearInterval(autoClickerInterval); autoClickerInterval = null; } // Clear existing
+                if (localStorage.getItem('autoClicker') === 'true') {
+                    autoClickerInterval = setInterval(() => {
+                        const generatedPlayerCash = window.applyClickBoost();
+                        window.playerCash += generatedPlayerCash;
+                        if (playerCashDisplayEl) playerCashDisplayEl.textContent = `Cash: ${window.playerCash.toFixed(1)}`;
+                        localStorage.setItem('playerCash', window.playerCash.toFixed(1));
+                    }, 1000);
+                    console.log("Auto Clicker initialized.");
+                } else {
+                    console.log("Auto Clicker not active.");
+                }
+            };
+
+
+            // Function to apply interest (defined globally)
+            window.applyInterest = function() {
+                let currentInterestRate = parseFloat(localStorage.getItem('interestRate')) || 0;
+
+                if (currentInterestRate && currentInterestRate > 0) {
+                    const earnings = Math.floor(window.playerPoints * (currentInterestRate / 100));
+                    if (earnings > 0) {
+                        window.playerPoints += earnings;
+                        if (playerPointsDisplayEl) playerPointsDisplayEl.textContent = `Points: ${window.playerPoints}`;
+                        localStorage.setItem('score', window.playerPoints.toString()); // Save as string
+                        console.log(`${earnings} Points earned from interest!`);
+                    }
+                }
+            };
+
+            // Function to initialize interest interval (defined globally)
+            window.initializeInterestInterval = function() {
+                if (interestInterval) { clearInterval(interestInterval); interestInterval = null; } // Clear existing
+                const currentInterestRate = parseFloat(localStorage.getItem('interestRate'));
+                if (currentInterestRate && currentInterestRate > 0) {
+                    interestInterval = setInterval(window.applyInterest, 10000); // Every 10 seconds
+                    console.log("Interest interval initialized. Rate: " + currentInterestRate + "%");
+                } else {
+                    console.log("Interest interval not started (no active interest upgrade).");
+                }
+            };
+
+            // Initial calls on page load
+            window.checkMightyClicks();
+            window.initializeAutoClicker();
+            window.initializeInterestInterval();
+
+            // Listen for messages from iframes (e.g., settings page)
+            window.addEventListener('message', (event) => {
+                // Ensure the message is from a trusted origin if deployed
+                if (event.data.type === 'settingsChanged') {
+                    const settings = event.data.settings;
+                    // Apply theme to main body
+                    if (settings.theme === 'dark') {
+                        document.body.classList.add('dark-theme');
+                        document.body.classList.remove('light-theme');
+                    } else {
+                        document.body.classList.remove('dark-theme');
+                        document.body.classList.add('light-theme');
+                    }
+                    // Update notification display time
+                    notificationDisplayTime = parseFloat(settings.notificationDisplayTime) || 5;
+                    console.log("Settings applied from iframe:", settings);
+                }
+            });
+
+            // Initialize anticheat value checks with current game state
+            if (typeof window.antiCheatInitializeValueChecks === 'function') {
+                window.antiCheatInitializeValueChecks(window.playerCash, window.playerPoints);
+            }
+
+            // Apply theme on initial load based on localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.body.classList.remove('light-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+            }
+        });
     </script>
-    <script src="./update/update_noti.js"></script>
 </body>
 </html>
