@@ -25,7 +25,7 @@
 
         /* Modal styles - Centralized for all modals */
         .modal {
-            display: none; /* Hidden by default - FIX: Removed conflicting display:flex here */
+            display: none; /* Hidden by default */
             position: fixed; /* Stay in place */
             z-index: 1000; /* Sit on top of most content */
             left: 0;
@@ -295,7 +295,7 @@
                 }
             };
 
-            // FIX: Consolidated window.onclick to handle all modals
+            // Consolidated window.onclick to handle all modals
             window.onclick = function(event) {
                 if (event.target == settingsModal) {
                     closeSettingsModal();
@@ -309,7 +309,7 @@
             };
 
             window.updateClickUpgraderStats = function(newClickValue, newUpgradeLevel, newUpgradeCost) {
-                // FIX: Use parseFloat for clickValue as it's a decimal
+                // Use parseFloat for clickValue as it's a decimal
                 window.clickValue = parseFloat(newClickValue) || 1;
                 window.upgradeLevel = parseInt(newUpgradeLevel) || 1;
                 window.upgradeCost = parseInt(newUpgradeCost) || 10;
@@ -328,7 +328,7 @@
                 checkMightyClicks(); // Re-check mighty clicks status after a click
             });
 
-            // FIX: Added optional color parameter to showMessage
+            // Added optional color parameter to showMessage
             window.showMessage = function(text, color = 'white') {
                 messageEl.textContent = text;
                 // Set background color based on type
@@ -515,7 +515,7 @@
             }
 
             // Apply theme on initial load based on localStorage
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('theme') || 'dark'; // Changed default to 'dark'
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-theme');
                 document.body.classList.remove('light-theme');
