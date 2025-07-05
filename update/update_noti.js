@@ -38,14 +38,31 @@ async function checkAndUpdateReleaseNotes() {
 
     const notesContainer = document.createElement('div');
     notesContainer.classList.add('update-notes-container');
-    notesContainer.innerHTML = notes; // Use innerHTML to render Markdown
+    // Replace newlines with <br> tags for line breaks
+    notesContainer.innerHTML = notes.replace(/\n/g, '<br>');
     modalContent.appendChild(notesContainer);
+
+    // Button container for close and view release notes buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('update-button-container');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'space-between';
+    buttonContainer.style.marginTop = '10px';
 
     const closeButton = document.createElement('button');
     closeButton.textContent = 'Close';
     closeButton.onclick = () => modal.remove();
 	closeButton.classList.add('update-close-button');
-    modalContent.appendChild(closeButton);
+    buttonContainer.appendChild(closeButton);
+
+    // View Full Release Notes button
+    const viewReleaseNotesButton = document.createElement('button');
+    viewReleaseNotesButton.textContent = 'View Full Release Notes';
+    viewReleaseNotesButton.classList.add('update-close-button'); // Use same style as close button
+    viewReleaseNotesButton.onclick = () => window.open(`https://github.com/mixtapejaxson/MixClick/releases/tag/${version}`, '_blank');
+    buttonContainer.appendChild(viewReleaseNotesButton);
+
+    modalContent.appendChild(buttonContainer);
 
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
