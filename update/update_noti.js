@@ -50,7 +50,9 @@ async function checkAndUpdateReleaseNotes() {
     buttonContainer.style.marginTop = '10px';
 
     const closeButton = document.createElement('button');
-    closeButton.textContent = 'Close';
+    const closeButtonWords = ['Cool!', 'Sweet!', 'Awesome!', 'Great!', 'Fantastic!', 'Excellent!', 'Amazing!', 'Wonderful!', 'Rad!', 'Tubular!'];
+    const randomIndex = Math.floor(Math.random() * closeButtonWords.length);
+    closeButton.textContent = closeButtonWords[randomIndex];
     closeButton.onclick = () => modal.remove();
 	closeButton.classList.add('update-close-button');
     // View Full Release Notes button
