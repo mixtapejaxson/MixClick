@@ -53,14 +53,14 @@ async function checkAndUpdateReleaseNotes() {
     closeButton.textContent = 'Close';
     closeButton.onclick = () => modal.remove();
 	closeButton.classList.add('update-close-button');
-    buttonContainer.appendChild(closeButton);
-
     // View Full Release Notes button
     const viewReleaseNotesButton = document.createElement('button');
     viewReleaseNotesButton.textContent = 'View Full Release Notes';
     viewReleaseNotesButton.classList.add('update-close-button'); // Use same style as close button
     viewReleaseNotesButton.onclick = () => window.open(`https://github.com/mixtapejaxson/MixClick/releases/tag/${version}`, '_blank');
     buttonContainer.appendChild(viewReleaseNotesButton);
+
+    buttonContainer.appendChild(closeButton);
 
     modalContent.appendChild(buttonContainer);
 
