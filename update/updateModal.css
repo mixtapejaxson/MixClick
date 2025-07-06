@@ -37,3 +37,37 @@
     color: #fff;
     cursor: pointer;
 }
+
+/* Style the scrollbar */
+.update-notes-container-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Scrollbar track */
+.update-notes-container-wrapper::-webkit-scrollbar-track {
+  background: #333;
+}
+
+/* Scrollbar thumb */
+.update-notes-container-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+/* Scrollbar thumb on hover */
+.update-notes-container-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.update-expand-button {
+	transition: background-color 0.3s; /* Add transition for smooth effect */
+}
+
+.update-notes-container-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-expand-button {
+  align-self: flex-end;
+}

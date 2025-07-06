@@ -36,11 +36,55 @@ async function checkAndUpdateReleaseNotes() {
 	versionHeader.classList.add('update-version-header');
     modalContent.appendChild(versionHeader);
 
-    const notesContainer = document.createElement('div');
-    notesContainer.classList.add('update-notes-container');
-    // Replace newlines with <br> tags for line breaks
-    notesContainer.innerHTML = notes.replace(/\n/g, '<br>');
-    modalContent.appendChild(notesContainer);
+    const notesLines = notes.split('\n');
+    const initialLines = notesLines.slice(0, 20);
+    const remainingLines = notesLines.slice(20);
+
+    const notesContainerWrapper = document.createElement('div');
+    notesContainerWrapper.classList.add('update-notes-container-wrapper');
+    notesContainerWrapper.style.height = '200px'; // Set a fixed height
+    notesContainerWrapper.style.overflow = 'auto';
+    notesContainerWrapper.style.position = 'relative'; // For positioning the expand button
+
+    const initialNotesContainer = document.createElement('div');
+    initialNotesContainer.classList.add('update-notes-container');
+    initialNotesContainer.innerHTML = initialLines.join('<br>');
+    notesContainerWrapper.appendChild(initialNotesContainer);
+
+    const remainingNotesContainer = document.createElement('div');
+    remainingNotesContainer.classList.add('update-notes-container');
+    remainingNotesContainer.innerHTML = remainingLines.join('<br>');
+    remainingNotesContainer.style.display = 'none'; // Initially hidden
+    notesContainerWrapper.appendChild(remainingNotesContainer);
+
+    const expandButton = document.createElement('button');
+    expandButton.innerHTML = 'Expand &#9660;'; // Initial down arrow
+    expandButton.classList.add('update-expand-button');
+    expandButton.style.position = 'sticky'; // Use sticky positioning
+    expandButton.style.bottom = '5px';
+    expandButton.style.right = '5px';
+    expandButton.style.background = 'rgba(51, 51, 51, 0.7)'; /* Semi-transparent background */
+    expandButton.style.border = 'none';
+    expandButton.style.color = '#ddd';
+    expandButton.style.cursor = 'pointer';
+    expandButton.style.padding = '5px';
+    expandButton.style.fontSize = '0.8em';
+    expandButton.style.borderRadius = '5px';
+
+    let isExpanded = false;
+    expandButton.onclick = () => {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        remainingNotesContainer.style.display = 'block';
+        expandButton.innerHTML = 'Collapse &#9650;'; // Up arrow
+      } else {
+        remainingNotesContainer.style.display = 'none';
+        expandButton.innerHTML = 'Expand &#9660;'; // Down arrow
+      }
+    };
+
+    notesContainerWrapper.appendChild(expandButton);
+    modalContent.appendChild(notesContainerWrapper);
 
     // Button container for close and view release notes buttons
     const buttonContainer = document.createElement('div');
