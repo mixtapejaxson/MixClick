@@ -1,3 +1,10 @@
+<!--
+ Copyright (c) 2025 mixtapejaxson
+ 
+ This software is released under the MIT License.
+ https://opensource.org/licenses/MIT
+-->
+
 # MixClicker
 
 > An endlessly addicting idle/clicking game where you strategically manage your resources to maximize your MixCoins per click and per second.  Climb the leaderboards and become the ultimate MixCoin tycoon!

@@ -1,3 +1,8 @@
+// Copyright (c) 2025 mixtapejaxson
+// 
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
 function initClickerGame() {
   // Obtain references to playerPoints display, button, and message elements.
   // These elements are expected to be in the parent window (index.html)
