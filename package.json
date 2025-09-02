@@ -2,7 +2,7 @@
   "name": "MixClick",
   "private": true,
   "type": "module",
-  "homepage": "http://mixtapejaxson.github.io/MixClick",
+  "homepage": "https://mixtapejaxson.github.io/MixClick",
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
