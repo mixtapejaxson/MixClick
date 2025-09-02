@@ -20,7 +20,7 @@ As a small side project, we must maintain professionalism and handle everything 
 
 ### 1.3 Project Forking and Creative Freedom
 
-(i) **You always have the right to fork the project.** As a collaborative, open-source project, you have the perpetual and unconditional right to create an independent version of this project at any time. This means you can take the codebase and all its assets and continue its development under a different name and direction.
+(i) **You always have the right to fork the project.** As a collaborative, open-source project, you have the perpetual and unconditional right to create an independent version of this project at any time. This means you can take the codebase and all its assets and continue its development under a different name and direction. However, please note that you must follow the projects license terms even if it's a fork. [See Terms](../../LICENSE).
 
 (ii) You are free to pursue your own vision and implement features as you see fit in a forked version, as long as you respect the original project's licensing and provide proper attribution.
 
