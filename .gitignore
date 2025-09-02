@@ -1,2 +1,7 @@
-.vscode/
+.DS_Store
+/node_modules/
+
+# React Router
+/.react-router/
+/build/
 docs/internal
