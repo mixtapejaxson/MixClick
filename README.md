@@ -43,6 +43,8 @@ The shop offers a variety of items and upgrades that boost your MixCoins per cli
 *   **Developer:** mixtapejaxson
 
 ## Contributing
+> [!WARNING]
+> Before you contribute to this repo, **Make sure you read the Code of Conduct!** [HERE](docs/public/CODE_OF_CONDUCT.md)
 
 If you'd like to contribute to MixClicker, feel free to fork the repository and submit pull requests!
 
