@@ -42,8 +42,6 @@ With these rights come specific responsibilities to ensure our team remains a pr
 
 (i) **Copyright and Licensing:** You must respect the copyrights and licenses of all external materials used in the project. This includes code, images, and other assets.
 
-(ii) **Project Property:** All work contributed to the MixClick project is considered the intellectual property of the project owner unless otherwise agreed upon in writing. You do not have the right to use, distribute, or profit from the project's intellectual property without explicit permission.
-
 ### 2.3 Confidentiality
 
 (i) **Private Information:** You are not to share any private information about the project, its members, or its processes with external parties. This includes trade secrets, unreleased features, or internal discussions.
