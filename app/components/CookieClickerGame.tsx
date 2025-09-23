@@ -1,6 +1,7 @@
-import React, { useEffect, useCallback, type Dispatch, type SetStateAction } from 'react';
+import React, { useEffect, useCallback, useState, type Dispatch, type SetStateAction } from 'react';
 import NotificationModal from './NotificationModal';
 import PopupModal from './PopupModal';
+import ShopModal from './ShopModal';
 import { abbreviateNumber } from '../utils/numberFormatter';
 import { useMobileDetection } from '../hooks/useMobileDetection';
 
@@ -46,6 +47,7 @@ export default function CookieClickerGame({
   initialUpgrades
 }: CookieClickerGameProps) {
   const isMobile = useMobileDetection();
+  const [showShopModal, setShowShopModal] = useState(false);
 
   const handleCookieClick = () => {
     setClicks(prevClicks => prevClicks + clickPower);
@@ -128,50 +130,30 @@ export default function CookieClickerGame({
       
       {/* Convert button */}
       <button
-        className={`${isMobile ? 'px-4 py-2 text-base mb-4' : 'px-6 py-3 text-lg mb-10'} bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors`}
+        className={`${isMobile ? 'px-4 py-2 text-base mb-4' : 'px-6 py-3 text-lg mb-6'} bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors`}
         onClick={convertClicksToCash}
       >
         Convert Clicks to Cash
       </button>
 
-      {/* Container for upgrades and lucky crates */}
-      <div className={`${isMobile ? 'w-full space-y-4' : 'w-full max-w-md space-y-8'}`}>
-        {/* Shop Upgrades */}
-        <div className={`bg-gray-800 ${isMobile ? 'p-4' : 'p-6'} rounded-lg shadow-xl border border-blue-400`}>
-          <h2 className={`${isMobile ? 'text-xl mb-3' : 'text-3xl mb-5'} font-bold text-blue-400`}>Shop Upgrades</h2>
-          <div className="space-y-3">
-            {upgrades.map(upgrade => (
-              <div key={upgrade.id} className={`flex ${isMobile ? 'flex-col space-y-2' : 'flex-col sm:flex-row justify-between items-center'} p-3 bg-gray-700 rounded-md shadow-sm border border-blue-300`}>
-                <div className="text-left">
-                  <span className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-white`}>{upgrade.name}</span>
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-300`}>{upgrade.description}</p>
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-blue-200`}>Cost: ${abbreviateNumber(upgrade.cost)} | Owned: {abbreviateNumber(upgrade.count)}</p>
-                </div>
-                <button
-                  onClick={() => purchaseUpgrade(upgrade.id)}
-                  disabled={cash < upgrade.cost}
-                  className={`${isMobile ? 'w-full px-4 py-2 text-sm' : 'px-5 py-2'} bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed`}
-                >
-                  Buy
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Shop button */}
+      <button
+        className={`${isMobile ? 'px-6 py-3 text-lg mb-6' : 'px-8 py-4 text-xl mb-8'} bg-purple-500 text-white font-bold rounded-lg shadow-lg hover:bg-purple-600 transition-colors`}
+        onClick={() => setShowShopModal(true)}
+      >
+        Open Shop
+      </button>
 
-        {/* Lucky Crates */}
-        <div className={`bg-gray-800 ${isMobile ? 'p-4' : 'p-6'} rounded-lg shadow-xl border border-yellow-400`}>
-          <h2 className={`${isMobile ? 'text-xl mb-3' : 'text-3xl mb-5'} font-bold text-yellow-400`}>Lucky Crates</h2>
-          <p className={`${isMobile ? 'text-base mb-3' : 'text-lg mb-4'}`}>Cost: <span className="font-semibold text-yellow-300">${abbreviateNumber(luckyCrateCost)}</span></p>
-          <button
-            className={`w-full ${isMobile ? 'px-4 py-2 text-sm' : 'px-5 py-2'} bg-yellow-500 text-gray-900 font-semibold rounded-md hover:bg-yellow-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed`}
-            onClick={purchaseLuckyCrate}
-            disabled={cash < luckyCrateCost}
-          >
-            Buy Lucky Crate
-          </button>
-        </div>
-      </div>
+      {/* Shop Modal */}
+      <ShopModal
+        isOpen={showShopModal}
+        onClose={() => setShowShopModal(false)}
+        cash={cash}
+        upgrades={upgrades}
+        onPurchaseUpgrade={purchaseUpgrade}
+        luckyCrateCost={luckyCrateCost}
+        onPurchaseLuckyCrate={purchaseLuckyCrate}
+      />
     </div>
   );
 }
