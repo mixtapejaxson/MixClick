@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, type Dispatch, type SetStateAction } fro
 import NotificationModal from './NotificationModal';
 import PopupModal from './PopupModal';
 import { abbreviateNumber } from '../utils/numberFormatter';
+import { useMobileDetection } from '../hooks/useMobileDetection';
 
 interface Upgrade {
   id: string;
@@ -44,6 +45,7 @@ export default function CookieClickerGame({
   upgrades, setUpgrades, notification, setNotification, popup, setPopup,
   initialUpgrades
 }: CookieClickerGameProps) {
+  const isMobile = useMobileDetection();
 
   const handleCookieClick = () => {
     setClicks(prevClicks => prevClicks + clickPower);
@@ -112,53 +114,63 @@ export default function CookieClickerGame({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center flex-grow p-4 bg-gray-900 text-white min-h-screen" onContextMenu={(e) => e.preventDefault()}>
-      <h1 className="text-4xl font-bold mb-6 text-blue-400">MixClick</h1>
+    <div className={`flex flex-col items-center justify-center flex-grow ${isMobile ? 'p-2' : 'p-4'} bg-gray-900 text-white min-h-screen`} onContextMenu={(e) => e.preventDefault()}>
+      <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-4 text-blue-400`}>MixClick</h1>
       <title>MixClick</title>
+      
+      {/* Main click button */}
       <button
-        className="px-8 py-4 bg-blue-500 text-white text-2xl font-bold rounded-full shadow-lg hover:bg-blue-600 transition-all duration-100 ease-in-out transform active:scale-95 mb-6"
+        className={`${isMobile ? 'px-6 py-3 text-xl' : 'px-8 py-4 text-2xl'} bg-blue-500 text-white font-bold rounded-full shadow-lg hover:bg-blue-600 transition-all duration-100 ease-in-out transform active:scale-95 mb-4`}
         onClick={handleCookieClick}
       >
         Click Me!
       </button>
+      
+      {/* Convert button */}
       <button
-        className="px-6 py-3 bg-green-500 text-white text-lg rounded-lg shadow hover:bg-green-600 transition-colors mb-10"
+        className={`${isMobile ? 'px-4 py-2 text-base mb-4' : 'px-6 py-3 text-lg mb-10'} bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors`}
         onClick={convertClicksToCash}
       >
         Convert Clicks to Cash
       </button>
 
-      <div className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-xl border border-blue-400 mb-8">
-        <h2 className="text-3xl font-bold mb-5 text-blue-400">Shop Upgrades</h2>
-        <div className="space-y-4">
-          {upgrades.map(upgrade => (
-            <div key={upgrade.id} className="flex flex-col sm:flex-row justify-between items-center p-4 bg-gray-700 rounded-md shadow-sm border border-blue-300">
-              <div className="text-left mb-2 sm:mb-0">
-                <span className="text-lg font-semibold text-white">{upgrade.name}</span>
-                <p className="text-sm text-gray-300">{upgrade.description}</p>
-                <p className="text-sm text-blue-200">Cost: ${abbreviateNumber(upgrade.cost)} | Owned: {abbreviateNumber(upgrade.count)}</p>
+      {/* Container for upgrades and lucky crates */}
+      <div className={`${isMobile ? 'w-full space-y-4' : 'w-full max-w-md space-y-8'}`}>
+        {/* Shop Upgrades */}
+        <div className={`bg-gray-800 ${isMobile ? 'p-4' : 'p-6'} rounded-lg shadow-xl border border-blue-400`}>
+          <h2 className={`${isMobile ? 'text-xl mb-3' : 'text-3xl mb-5'} font-bold text-blue-400`}>Shop Upgrades</h2>
+          <div className="space-y-3">
+            {upgrades.map(upgrade => (
+              <div key={upgrade.id} className={`flex ${isMobile ? 'flex-col space-y-2' : 'flex-col sm:flex-row justify-between items-center'} p-3 bg-gray-700 rounded-md shadow-sm border border-blue-300`}>
+                <div className="text-left">
+                  <span className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-white`}>{upgrade.name}</span>
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-300`}>{upgrade.description}</p>
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-blue-200`}>Cost: ${abbreviateNumber(upgrade.cost)} | Owned: {abbreviateNumber(upgrade.count)}</p>
+                </div>
+                <button
+                  onClick={() => purchaseUpgrade(upgrade.id)}
+                  disabled={cash < upgrade.cost}
+                  className={`${isMobile ? 'w-full px-4 py-2 text-sm' : 'px-5 py-2'} bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed`}
+                >
+                  Buy
+                </button>
               </div>
-              <button
-                onClick={() => purchaseUpgrade(upgrade.id)}
-                disabled={cash < upgrade.cost}
-                className="px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"
-              >
-                Buy
-              </button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-xl border border-yellow-400">
-        <h2 className="text-3xl font-bold mb-5 text-yellow-400">Lucky Crates</h2>
-        <p className="text-lg mb-4">Cost: <span className="font-semibold text-yellow-300">${abbreviateNumber(luckyCrateCost)}</span></p>
-        <button
-          className="w-full px-5 py-2 bg-yellow-500 text-gray-900 font-semibold rounded-md hover:bg-yellow-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"
-          onClick={purchaseLuckyCrate}
-          disabled={cash < luckyCrateCost}
-        >
-          Buy Lucky Crate
-        </button>
+
+        {/* Lucky Crates */}
+        <div className={`bg-gray-800 ${isMobile ? 'p-4' : 'p-6'} rounded-lg shadow-xl border border-yellow-400`}>
+          <h2 className={`${isMobile ? 'text-xl mb-3' : 'text-3xl mb-5'} font-bold text-yellow-400`}>Lucky Crates</h2>
+          <p className={`${isMobile ? 'text-base mb-3' : 'text-lg mb-4'}`}>Cost: <span className="font-semibold text-yellow-300">${abbreviateNumber(luckyCrateCost)}</span></p>
+          <button
+            className={`w-full ${isMobile ? 'px-4 py-2 text-sm' : 'px-5 py-2'} bg-yellow-500 text-gray-900 font-semibold rounded-md hover:bg-yellow-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed`}
+            onClick={purchaseLuckyCrate}
+            disabled={cash < luckyCrateCost}
+          >
+            Buy Lucky Crate
+          </button>
+        </div>
       </div>
     </div>
   );
