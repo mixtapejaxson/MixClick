@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useMobileDetection } from '../hooks/useMobileDetection';
 
 interface NotificationProps {
   message: string;
@@ -10,6 +11,7 @@ interface NotificationProps {
 const NotificationModal: React.FC<NotificationProps> = ({ message, type, duration = 3000, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [animationClass, setAnimationClass] = useState('slide-in-notification');
+  const isMobile = useMobileDetection();
 
   useEffect(() => {
     setIsVisible(true); // Show immediately when component mounts
@@ -43,11 +45,11 @@ const NotificationModal: React.FC<NotificationProps> = ({ message, type, duratio
   };
 
   return (
-    <div className={`fixed top-16 right-4 w-80 p-4 rounded-lg shadow-xl text-white z-50 border-l-8 ${typeClasses[type]} ${animationClass}`}>
+    <div className={`fixed ${isMobile ? 'top-20 left-2 right-2 w-auto' : 'top-16 right-4 w-80'} p-4 rounded-lg shadow-xl text-white z-50 border-l-8 ${typeClasses[type]} ${animationClass}`}>
       <div className="flex items-center">
-        <i className={`fas ${iconClasses[type]} text-2xl mr-3`}></i>
-        <p className="flex-grow text-lg font-semibold">{message}</p>
-        <button onClick={() => { setAnimationClass('slide-out-notification'); setTimeout(() => { setIsVisible(false); onClose(); }, 500); }} className="ml-4 text-xl font-bold opacity-75 hover:opacity-100 transition-opacity">
+        <i className={`fas ${iconClasses[type]} ${isMobile ? 'text-xl mr-2' : 'text-2xl mr-3'}`}></i>
+        <p className={`flex-grow ${isMobile ? 'text-base' : 'text-lg'} font-semibold`}>{message}</p>
+        <button onClick={() => { setAnimationClass('slide-out-notification'); setTimeout(() => { setIsVisible(false); onClose(); }, 500); }} className={`${isMobile ? 'ml-2 text-lg' : 'ml-4 text-xl'} font-bold opacity-75 hover:opacity-100 transition-opacity`}>
           &times;
         </button>
       </div>
