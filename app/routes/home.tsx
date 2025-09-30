@@ -4,6 +4,8 @@ import TopBar from "../components/TopBar";
 import NotificationModal from '../components/NotificationModal';
 import PopupModal from '../components/PopupModal';
 import SettingsModal from '../components/SettingsModal';
+import UpdateModal from '../components/UpdateModal';
+import { checkForNewRelease, setLastSeenVersion } from '../utils/githubRelease';
 
 export default function Home() {
   const [clicks, setClicks] = useState(0);
@@ -28,6 +30,8 @@ export default function Home() {
   const [upgrades, setUpgrades] = useState(initialUpgrades);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null);
   const [popup, setPopup] = useState<{ title: string; message: string; onConfirm: () => void; onCancel: () => void } | null>(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<{ version: string; releaseNotes: string; htmlUrl: string } | null>(null);
 
   const saveGame = useCallback(() => {
     const gameState = {
@@ -71,6 +75,23 @@ export default function Home() {
     loadGame(); // Load game on component mount
   }, [loadGame]);
 
+  useEffect(() => {
+    // Check for new releases
+    const checkUpdates = async () => {
+      const { isNewRelease, release } = await checkForNewRelease();
+      if (isNewRelease && release) {
+        setUpdateInfo({
+          version: release.tag_name,
+          releaseNotes: release.body,
+          htmlUrl: release.html_url,
+        });
+        setShowUpdateModal(true);
+      }
+    };
+    
+    checkUpdates();
+  }, []);
+
   const handleRebirth = () => {
     setRebirths(prev => prev + 1);
     setPrestigeCurrency(prev => prev + Math.floor(cash / 1000000)); // 1 prestige currency per 1,000,000 cash
@@ -103,6 +124,13 @@ export default function Home() {
     setUpgrades(initialUpgrades);
     setNotification({ message: 'Game progress reset!', type: 'success' });
     handleCloseSettings();
+  };
+
+  const handleCloseUpdateModal = () => {
+    if (updateInfo) {
+      setLastSeenVersion(updateInfo.version);
+    }
+    setShowUpdateModal(false);
   };
 
   return (
@@ -167,6 +195,16 @@ export default function Home() {
         onClose={handleCloseSettings}
         onResetSave={handleResetSave}
       />
+
+      {showUpdateModal && updateInfo && (
+        <UpdateModal
+          isOpen={showUpdateModal}
+          onClose={handleCloseUpdateModal}
+          version={updateInfo.version}
+          releaseNotes={updateInfo.releaseNotes}
+          htmlUrl={updateInfo.htmlUrl}
+        />
+      )}
     </div>
   );
 }
