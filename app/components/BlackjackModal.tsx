@@ -186,50 +186,79 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-      <div className={`bg-gradient-to-br from-green-800 to-green-900 text-white ${
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div className={`bg-gradient-to-br from-green-800 via-green-700 to-emerald-900 text-white ${
         isMobile 
-          ? 'p-4 mx-4 max-w-sm' 
-          : 'p-6 max-w-2xl'
-      } w-full rounded-lg shadow-xl`}>
+          ? 'p-5 mx-2 max-w-sm' 
+          : 'p-8 max-w-3xl'
+      } w-full rounded-3xl shadow-2xl border-4 border-yellow-500/30 relative overflow-hidden`}>
+        
+        {/* Decorative Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+        </div>
         
         {/* Header */}
-        <div className="flex justify-between items-center mb-4 border-b border-green-700 pb-3">
-          <h2 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-yellow-400`}>
-            ♠ Blackjack ♥
-          </h2>
+        <div className="relative flex justify-between items-center mb-6 pb-4 border-b-2 border-yellow-500/40">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg rotate-12">
+              <span className="text-2xl">🃏</span>
+            </div>
+            <h2 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-black text-yellow-300 drop-shadow-lg`}>
+              ♠ Blackjack ♥
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className={`${isMobile ? 'text-2xl p-1' : 'text-3xl p-2'} text-gray-400 hover:text-white transition-colors`}
+            className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded-xl bg-red-600/80 hover:bg-red-600 flex items-center justify-center transition-all text-white text-2xl font-bold shadow-lg`}
           >
             ×
           </button>
         </div>
 
         {/* Game Info */}
-        <div className={`${isMobile ? 'text-sm mb-3' : 'text-lg mb-4'} text-center`}>
-          <p>Cash: <span className="font-semibold text-yellow-400">${abbreviateNumber(cash)}</span></p>
+        <div className="relative mb-6">
+          <div className="flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-yellow-900/40 to-amber-900/40 rounded-2xl border-2 border-yellow-500/40">
+            <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl flex items-center justify-center">
+              <span className="text-xl">💰</span>
+            </div>
+            <div>
+              <p className="text-xs text-yellow-300">Your Balance</p>
+              <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-black text-yellow-100`}>
+                ${abbreviateNumber(cash)}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Dealer Hand */}
-        <div className="mb-4">
-          <h3 className={`${isMobile ? 'text-sm' : 'text-lg'} font-semibold mb-2`}>
-            Dealer {gameState !== 'betting' && `(${gameState === 'playing' ? '?' : calculateHandValue(dealerHand)})`}
-          </h3>
-          <div className="flex gap-2 justify-center min-h-20">
+        <div className="relative mb-6 p-4 bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-2xl border-2 border-green-600/40">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">🎩</span>
+            <h3 className={`${isMobile ? 'text-base' : 'text-xl'} font-bold text-white`}>
+              Dealer {gameState !== 'betting' && (
+                <span className="ml-2 px-3 py-1 bg-yellow-500/30 rounded-full text-sm">
+                  {gameState === 'playing' ? '?' : calculateHandValue(dealerHand)}
+                </span>
+              )}
+            </h3>
+          </div>
+          <div className="flex gap-3 justify-center min-h-24">
             {dealerHand.map((card, index) => (
               <div
                 key={index}
-                className={`${isMobile ? 'w-12 h-16 text-xl' : 'w-16 h-24 text-2xl'} bg-white text-gray-900 rounded shadow-lg flex flex-col items-center justify-center font-bold ${
-                  index === 1 && gameState === 'playing' ? 'bg-gray-300' : ''
+                className={`${isMobile ? 'w-14 h-20 text-xl' : 'w-20 h-28 text-3xl'} bg-gradient-to-br from-white to-gray-100 text-gray-900 rounded-xl shadow-2xl flex flex-col items-center justify-center font-black border-4 border-gray-200 transform transition-all hover:scale-105 ${
+                  index === 1 && gameState === 'playing' ? 'from-blue-600 to-blue-700 border-blue-800' : ''
                 }`}
               >
-                {index === 1 && gameState === 'playing' ? '?' : (
+                {index === 1 && gameState === 'playing' ? (
+                  <span className="text-white text-4xl">🂠</span>
+                ) : (
                   <>
                     <span className={card.suit === '♥' || card.suit === '♦' ? 'text-red-600' : 'text-gray-900'}>
                       {card.value}
                     </span>
-                    <span className={card.suit === '♥' || card.suit === '♦' ? 'text-red-600' : 'text-gray-900'}>
+                    <span className={`text-2xl ${card.suit === '♥' || card.suit === '♦' ? 'text-red-600' : 'text-gray-900'}`}>
                       {card.suit}
                     </span>
                   </>
@@ -240,20 +269,27 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
         </div>
 
         {/* Player Hand */}
-        <div className="mb-4">
-          <h3 className={`${isMobile ? 'text-sm' : 'text-lg'} font-semibold mb-2`}>
-            You {gameState !== 'betting' && `(${calculateHandValue(playerHand)})`}
-          </h3>
-          <div className="flex gap-2 justify-center min-h-20">
+        <div className="relative mb-6 p-4 bg-gradient-to-br from-blue-900/40 to-blue-800/40 rounded-2xl border-2 border-blue-500/40">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">👤</span>
+            <h3 className={`${isMobile ? 'text-base' : 'text-xl'} font-bold text-white`}>
+              You {gameState !== 'betting' && (
+                <span className="ml-2 px-3 py-1 bg-blue-500/30 rounded-full text-sm">
+                  {calculateHandValue(playerHand)}
+                </span>
+              )}
+            </h3>
+          </div>
+          <div className="flex gap-3 justify-center min-h-24">
             {playerHand.map((card, index) => (
               <div
                 key={index}
-                className={`${isMobile ? 'w-12 h-16 text-xl' : 'w-16 h-24 text-2xl'} bg-white text-gray-900 rounded shadow-lg flex flex-col items-center justify-center font-bold`}
+                className={`${isMobile ? 'w-14 h-20 text-xl' : 'w-20 h-28 text-3xl'} bg-gradient-to-br from-white to-gray-100 text-gray-900 rounded-xl shadow-2xl flex flex-col items-center justify-center font-black border-4 border-gray-200 transform transition-all hover:scale-105`}
               >
                 <span className={card.suit === '♥' || card.suit === '♦' ? 'text-red-600' : 'text-gray-900'}>
                   {card.value}
                 </span>
-                <span className={card.suit === '♥' || card.suit === '♦' ? 'text-red-600' : 'text-gray-900'}>
+                <span className={`text-2xl ${card.suit === '♥' || card.suit === '♦' ? 'text-red-600' : 'text-gray-900'}`}>
                   {card.suit}
                 </span>
               </div>
@@ -262,40 +298,40 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
         </div>
 
         {/* Message */}
-        <div className={`${isMobile ? 'text-sm mb-4' : 'text-lg mb-6'} text-center font-semibold text-yellow-300`}>
-          {message}
+        <div className={`${isMobile ? 'text-sm mb-5 p-3' : 'text-xl mb-6 p-4'} text-center font-black bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-2xl border-2 border-yellow-500/40`}>
+          <span className="text-yellow-100 drop-shadow-lg">{message}</span>
         </div>
 
         {/* Betting Controls */}
         {gameState === 'betting' && (
-          <div className="space-y-3 mb-4">
-            <div className="flex items-center justify-center gap-2">
-              <label className={`${isMobile ? 'text-sm' : 'text-base'}`}>Bet:</label>
+          <div className="relative space-y-4 mb-6">
+            <div className="flex items-center justify-center gap-3 p-4 bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl border-2 border-yellow-500/30">
+              <label className={`${isMobile ? 'text-sm' : 'text-lg'} font-bold text-yellow-300`}>Place Your Bet:</label>
               <input
                 type="number"
                 value={bet}
                 onChange={(e) => setBet(Math.max(10, parseInt(e.target.value, 10) || 10))}
-                className={`${isMobile ? 'w-24 px-2 py-1 text-sm' : 'w-32 px-3 py-2'} bg-white text-gray-900 rounded border border-gray-300 focus:outline-none focus:border-yellow-500`}
+                className={`${isMobile ? 'w-28 px-3 py-2 text-base' : 'w-36 px-4 py-3 text-lg'} bg-white text-gray-900 rounded-xl border-2 border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-bold shadow-inner`}
                 min="10"
                 step="10"
               />
             </div>
-            <div className="flex gap-2 justify-center">
+            <div className="flex gap-3 justify-center">
               <button
                 onClick={() => setBet(Math.min(bet + 50, cash))}
-                className={`${isMobile ? 'px-3 py-1 text-sm' : 'px-4 py-2'} bg-green-600 rounded hover:bg-green-700 transition-colors`}
+                className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3 text-base'} bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl`}
               >
                 +$50
               </button>
               <button
                 onClick={() => setBet(Math.min(bet + 100, cash))}
-                className={`${isMobile ? 'px-3 py-1 text-sm' : 'px-4 py-2'} bg-green-600 rounded hover:bg-green-700 transition-colors`}
+                className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3 text-base'} bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl`}
               >
                 +$100
               </button>
               <button
                 onClick={() => setBet(Math.max(10, bet - 50))}
-                className={`${isMobile ? 'px-3 py-1 text-sm' : 'px-4 py-2'} bg-red-600 rounded hover:bg-red-700 transition-colors`}
+                className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3 text-base'} bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl`}
               >
                 -$50
               </button>
@@ -304,14 +340,14 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-3 justify-center">
+        <div className="relative flex gap-4 justify-center mb-6">
           {gameState === 'betting' && (
             <button
               onClick={startGame}
               disabled={bet > cash}
-              className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3 text-lg'} bg-yellow-500 text-gray-900 font-bold rounded hover:bg-yellow-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed`}
+              className={`${isMobile ? 'px-8 py-4 text-base' : 'px-12 py-5 text-xl'} bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-black rounded-2xl hover:from-yellow-600 hover:to-amber-700 transition-all shadow-2xl hover:shadow-yellow-500/50 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transform hover:-translate-y-1 active:translate-y-0`}
             >
-              Deal
+              🃏 Deal Cards
             </button>
           )}
           
@@ -319,15 +355,15 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
             <>
               <button
                 onClick={hit}
-                className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3 text-lg'} bg-green-600 text-white font-bold rounded hover:bg-green-700 transition-colors`}
+                className={`${isMobile ? 'px-6 py-3 text-base' : 'px-10 py-4 text-xl'} bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-2xl hover:shadow-green-500/50 transform hover:-translate-y-1 active:translate-y-0`}
               >
-                Hit
+                👍 Hit
               </button>
               <button
                 onClick={stand}
-                className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3 text-lg'} bg-red-600 text-white font-bold rounded hover:bg-red-700 transition-colors`}
+                className={`${isMobile ? 'px-6 py-3 text-base' : 'px-10 py-4 text-xl'} bg-gradient-to-r from-red-500 to-red-600 text-white font-black rounded-2xl hover:from-red-600 hover:to-red-700 transition-all shadow-2xl hover:shadow-red-500/50 transform hover:-translate-y-1 active:translate-y-0`}
               >
-                Stand
+                🛑 Stand
               </button>
             </>
           )}
@@ -335,20 +371,20 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
           {gameState === 'gameOver' && (
             <button
               onClick={resetGame}
-              className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3 text-lg'} bg-blue-600 text-white font-bold rounded hover:bg-blue-700 transition-colors`}
+              className={`${isMobile ? 'px-8 py-4 text-base' : 'px-12 py-5 text-xl'} bg-gradient-to-r from-blue-500 to-blue-600 text-white font-black rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-2xl hover:shadow-blue-500/50 transform hover:-translate-y-1 active:translate-y-0`}
             >
-              New Game
+              🔄 New Game
             </button>
           )}
         </div>
 
         {/* Close Button */}
-        <div className="mt-4 text-center">
+        <div className="relative text-center border-t-2 border-yellow-500/30 pt-4">
           <button
             onClick={onClose}
-            className={`${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3'} bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors`}
+            className={`${isMobile ? 'px-6 py-3 text-sm' : 'px-8 py-4 text-base'} bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all shadow-lg`}
           >
-            Close Casino
+            🚪 Close Casino
           </button>
         </div>
       </div>
