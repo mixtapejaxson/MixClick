@@ -11,9 +11,10 @@ interface TopBarProps {
   cash: number;
   rebirths: number;
   prestigeCurrency: number;
+  canRebirth: boolean;
 }
 
-export default function TopBar({ onSaveGame, onLoadGame, onRebirth, onOpenSettings, clicks, cash, rebirths, prestigeCurrency }: TopBarProps) {
+export default function TopBar({ onSaveGame, onLoadGame, onRebirth, onOpenSettings, clicks, cash, rebirths, prestigeCurrency, canRebirth }: TopBarProps) {
   const isMobile = useMobileDetection();
 
   if (isMobile) {
@@ -26,7 +27,9 @@ export default function TopBar({ onSaveGame, onLoadGame, onRebirth, onOpenSettin
             <button onClick={onLoadGame} className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">Load</button>
           </div>
           <div className="flex space-x-2">
-            <button onClick={onRebirth} className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors">Rebirth</button>
+            {canRebirth && (
+              <button onClick={onRebirth} className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors">Rebirth</button>
+            )}
             <button onClick={onOpenSettings} className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors">Settings</button>
           </div>
         </div>
@@ -54,7 +57,9 @@ export default function TopBar({ onSaveGame, onLoadGame, onRebirth, onOpenSettin
         <p>Prestige Currency: <span className="font-semibold text-yellow-400">{abbreviateNumber(prestigeCurrency)}</span></p>
       </div>
       <div className="flex space-x-4 items-center">
-        <button onClick={onRebirth} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors">Rebirth</button>
+        {canRebirth && (
+          <button onClick={onRebirth} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors">Rebirth</button>
+        )}
         <button onClick={onOpenSettings} className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">Settings</button>
       </div>
     </div>

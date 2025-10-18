@@ -37,6 +37,7 @@ interface CookieClickerGameProps {
   popup: { title: string; message: string; onConfirm: () => void; onCancel: () => void } | null;
   setPopup: Dispatch<SetStateAction<{ title: string; message: string; onConfirm: () => void; onCancel: () => void } | null>>;
   initialUpgrades: Upgrade[];
+  onOpenCasino: () => void;
 }
 
 export default function CookieClickerGame({
@@ -44,13 +45,16 @@ export default function CookieClickerGame({
   autoClickers, setAutoClickers, luckyCrateCost, setLuckyCrateCost,
   rebirths, setRebirths, prestigeCurrency, setPrestigeCurrency,
   upgrades, setUpgrades, notification, setNotification, popup, setPopup,
-  initialUpgrades
+  initialUpgrades, onOpenCasino
 }: CookieClickerGameProps) {
   const isMobile = useMobileDetection();
   const [showShopModal, setShowShopModal] = useState(false);
 
   const handleCookieClick = () => {
-    setClicks(prevClicks => prevClicks + clickPower);
+    // Apply prestige multiplier: 1% bonus per prestige currency
+    const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
+    const effectiveClickPower = Math.floor(clickPower * prestigeMultiplier);
+    setClicks(prevClicks => prevClicks + effectiveClickPower);
     // Lucky crates are now purchased, not random on click
   };
 
@@ -79,13 +83,16 @@ export default function CookieClickerGame({
     });
   };
 
-  // Auto clicker effect
+  // Auto clicker effect with prestige multiplier
   useEffect(() => {
     const interval = setInterval(() => {
-      setClicks(prevClicks => prevClicks + autoClickers);
+      // Apply prestige multiplier: 1% bonus per prestige currency
+      const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
+      const effectiveAutoClickers = Math.floor(autoClickers * prestigeMultiplier);
+      setClicks(prevClicks => prevClicks + effectiveAutoClickers);
     }, 1000);
     return () => clearInterval(interval);
-  }, [autoClickers, setClicks]);
+  }, [autoClickers, prestigeCurrency, setClicks]);
 
   const purchaseLuckyCrate = () => {
     if (cash >= luckyCrateCost) {
@@ -115,10 +122,20 @@ export default function CookieClickerGame({
     randomOutcome.effect();
   };
 
+  // Calculate prestige multiplier
+  const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
+
   return (
     <div className={`flex flex-col items-center justify-center flex-grow ${isMobile ? 'p-2' : 'p-4'} bg-gray-900 text-white min-h-screen`} onContextMenu={(e) => e.preventDefault()}>
       <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-4 text-blue-400`}>MixClick</h1>
       <title>MixClick</title>
+      
+      {/* Prestige Multiplier Display */}
+      {prestigeCurrency > 0 && (
+        <div className={`${isMobile ? 'text-sm mb-2' : 'text-base mb-3'} text-yellow-400 font-semibold`}>
+          Prestige Multiplier: {prestigeMultiplier.toFixed(2)}x
+        </div>
+      )}
       
       {/* Main click button */}
       <button
@@ -138,10 +155,18 @@ export default function CookieClickerGame({
 
       {/* Shop button */}
       <button
-        className={`${isMobile ? 'px-6 py-3 text-lg mb-6' : 'px-8 py-4 text-xl mb-8'} bg-purple-500 text-white font-bold rounded-lg shadow-lg hover:bg-purple-600 transition-colors`}
+        className={`${isMobile ? 'px-6 py-3 text-lg mb-4' : 'px-8 py-4 text-xl mb-6'} bg-purple-500 text-white font-bold rounded-lg shadow-lg hover:bg-purple-600 transition-colors`}
         onClick={() => setShowShopModal(true)}
       >
         Open Shop
+      </button>
+
+      {/* Casino button */}
+      <button
+        className={`${isMobile ? 'px-6 py-3 text-lg mb-6' : 'px-8 py-4 text-xl mb-8'} bg-yellow-500 text-gray-900 font-bold rounded-lg shadow-lg hover:bg-yellow-600 transition-colors`}
+        onClick={onOpenCasino}
+      >
+        🎰 Casino (Blackjack)
       </button>
 
       {/* Shop Modal */}
