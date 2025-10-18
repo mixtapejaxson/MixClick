@@ -79,6 +79,13 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
     }
 
     const newDeck = createDeck();
+    
+    // Validate deck has enough cards
+    if (newDeck.length < 4) {
+      setMessage('Error: Not enough cards in deck!');
+      return;
+    }
+    
     const newPlayerHand = [newDeck.pop()!, newDeck.pop()!];
     const newDealerHand = [newDeck.pop()!, newDeck.pop()!];
     
@@ -98,6 +105,14 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
     if (gameState !== 'playing') return;
     
     const newDeck = [...deck];
+    
+    // Validate deck has cards
+    if (newDeck.length === 0) {
+      setMessage('No more cards in deck!');
+      stand();
+      return;
+    }
+    
     const newCard = newDeck.pop()!;
     const newPlayerHand = [...playerHand, newCard];
     setPlayerHand(newPlayerHand);
@@ -127,7 +142,7 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
     let newDealerHand = [...dealerHand];
     let newDeck = [...deck];
     
-    while (calculateHandValue(newDealerHand) < 17) {
+    while (calculateHandValue(newDealerHand) < 17 && newDeck.length > 0) {
       const newCard = newDeck.pop()!;
       newDealerHand.push(newCard);
     }
@@ -259,7 +274,7 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
               <input
                 type="number"
                 value={bet}
-                onChange={(e) => setBet(Math.max(10, parseInt(e.target.value) || 10))}
+                onChange={(e) => setBet(Math.max(10, parseInt(e.target.value, 10) || 10))}
                 className={`${isMobile ? 'w-24 px-2 py-1 text-sm' : 'w-32 px-3 py-2'} bg-white text-gray-900 rounded border border-gray-300 focus:outline-none focus:border-yellow-500`}
                 min="10"
                 step="10"

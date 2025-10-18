@@ -126,7 +126,7 @@ export default function CookieClickerGame({
   const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
 
   return (
-    <div className={`flex flex-col items-center justify-center flex-grow ${isMobile ? 'p-2' : 'p-4'} bg-gray-900 text-white min-h-screen`} onContextMenu={(e) => e.preventDefault()}>
+    <div className={`flex flex-col items-center justify-center flex-grow ${isMobile ? 'p-2' : 'p-4'} min-h-screen`} onContextMenu={(e) => e.preventDefault()}>
       <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-4 text-blue-400`}>MixClick</h1>
       <title>MixClick</title>
       
