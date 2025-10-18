@@ -126,27 +126,27 @@ export default function CookieClickerGame({
   const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
 
   return (
-    <div className={`flex flex-col items-center justify-center flex-grow ${isMobile ? 'p-4' : 'p-8'} min-h-screen`} onContextMenu={(e) => e.preventDefault()}>
+    <div className="flex flex-col items-center justify-center flex-grow p-3 sm:p-6 md:p-8 min-h-screen" onContextMenu={(e) => e.preventDefault()}>
       {/* Logo/Title */}
-      <div className="mb-8 text-center">
-        <h1 className={`${isMobile ? 'text-4xl' : 'text-6xl'} font-black mb-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse`}>
+      <div className="mb-6 sm:mb-8 text-center">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black mb-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
           MixClick
         </h1>
-        <p className={`${isMobile ? 'text-sm' : 'text-base'} text-gray-400 font-medium`}>The Ultimate Idle Clicker Experience</p>
+        <p className="text-xs sm:text-sm md:text-base text-gray-400 font-medium">The Ultimate Idle Clicker Experience</p>
       </div>
       <title>MixClick</title>
       
       {/* Prestige Multiplier Display */}
       {prestigeCurrency > 0 && (
-        <div className={`${isMobile ? 'text-sm mb-4 px-4 py-2' : 'text-lg mb-6 px-6 py-3'} bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/50 rounded-xl backdrop-blur-sm`}>
+        <div className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/50 rounded-xl backdrop-blur-sm">
           <span className="text-yellow-300 font-bold">✨ Prestige Multiplier: </span>
-          <span className="text-yellow-100 font-black text-xl">{prestigeMultiplier.toFixed(2)}x</span>
+          <span className="text-yellow-100 font-black text-lg sm:text-xl">{prestigeMultiplier.toFixed(2)}x</span>
         </div>
       )}
       
       {/* Main click button */}
       <button
-        className={`${isMobile ? 'w-48 h-48 text-2xl' : 'w-64 h-64 text-4xl'} bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 text-white font-black rounded-full shadow-2xl hover:shadow-blue-500/50 hover:from-blue-600 hover:via-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-110 active:scale-95 mb-8 border-4 border-white/20 relative overflow-hidden group`}
+        className="w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 text-xl sm:text-3xl md:text-4xl bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 text-white font-black rounded-full shadow-2xl hover:shadow-blue-500/50 hover:from-blue-600 hover:via-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-110 active:scale-95 mb-6 sm:mb-8 border-4 border-white/20 relative overflow-hidden group"
         onClick={handleCookieClick}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -154,58 +154,58 @@ export default function CookieClickerGame({
       </button>
       
       {/* Action Buttons Grid */}
-      <div className={`grid ${isMobile ? 'grid-cols-1 gap-3 w-full max-w-xs' : 'grid-cols-3 gap-4 w-full max-w-3xl'}`}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full max-w-xs sm:max-w-3xl px-2 sm:px-0">
         {/* Convert button */}
         <button
-          className={`${isMobile ? 'px-6 py-4' : 'px-8 py-5'} bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-green-500/50 hover:from-green-600 hover:to-emerald-700 transition-all transform hover:-translate-y-1 active:translate-y-0`}
+          className="px-5 py-3 sm:px-6 sm:py-4 md:px-8 md:py-5 bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-green-500/50 hover:from-green-600 hover:to-emerald-700 transition-all transform hover:-translate-y-1 active:translate-y-0"
           onClick={convertClicksToCash}
         >
           <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl">💰</span>
-            <span className={isMobile ? 'text-sm' : 'text-base'}>Convert to Cash</span>
+            <span className="text-xl sm:text-2xl">💰</span>
+            <span className="text-sm sm:text-base">Convert to Cash</span>
           </div>
         </button>
 
         {/* Shop button */}
         <button
-          className={`${isMobile ? 'px-6 py-4' : 'px-8 py-5'} bg-gradient-to-br from-purple-500 to-purple-700 text-white font-bold rounded-2xl shadow-xl hover:shadow-purple-500/50 hover:from-purple-600 hover:to-purple-800 transition-all transform hover:-translate-y-1 active:translate-y-0`}
+          className="px-5 py-3 sm:px-6 sm:py-4 md:px-8 md:py-5 bg-gradient-to-br from-purple-500 to-purple-700 text-white font-bold rounded-2xl shadow-xl hover:shadow-purple-500/50 hover:from-purple-600 hover:to-purple-800 transition-all transform hover:-translate-y-1 active:translate-y-0"
           onClick={() => setShowShopModal(true)}
         >
           <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl">🛒</span>
-            <span className={isMobile ? 'text-sm' : 'text-base'}>Shop</span>
+            <span className="text-xl sm:text-2xl">🛒</span>
+            <span className="text-sm sm:text-base">Shop</span>
           </div>
         </button>
 
         {/* Casino button */}
         <button
-          className={`${isMobile ? 'px-6 py-4' : 'px-8 py-5'} bg-gradient-to-br from-yellow-500 to-orange-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-yellow-500/50 hover:from-yellow-600 hover:to-orange-700 transition-all transform hover:-translate-y-1 active:translate-y-0`}
+          className="px-5 py-3 sm:px-6 sm:py-4 md:px-8 md:py-5 bg-gradient-to-br from-yellow-500 to-orange-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-yellow-500/50 hover:from-yellow-600 hover:to-orange-700 transition-all transform hover:-translate-y-1 active:translate-y-0"
           onClick={onOpenCasino}
         >
           <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl">🎰</span>
-            <span className={isMobile ? 'text-sm' : 'text-base'}>Casino</span>
+            <span className="text-xl sm:text-2xl">🎰</span>
+            <span className="text-sm sm:text-base">Casino</span>
           </div>
         </button>
       </div>
 
       {/* Stats Display */}
-      <div className={`mt-8 grid ${isMobile ? 'grid-cols-2 gap-3 w-full max-w-xs' : 'grid-cols-4 gap-4 w-full max-w-3xl'}`}>
-        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-xl p-3 backdrop-blur-sm">
+      <div className="mt-6 sm:mt-8 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4 w-full max-w-xs sm:max-w-3xl px-2 sm:px-0">
+        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-blue-300 font-medium mb-1">Click Power</p>
-          <p className="text-xl font-bold text-white">{abbreviateNumber(Math.floor(clickPower * prestigeMultiplier))}</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{abbreviateNumber(Math.floor(clickPower * prestigeMultiplier))}</p>
         </div>
-        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-xl p-3 backdrop-blur-sm">
+        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-green-300 font-medium mb-1">Auto Clickers</p>
-          <p className="text-xl font-bold text-white">{abbreviateNumber(Math.floor(autoClickers * prestigeMultiplier))}/s</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{abbreviateNumber(Math.floor(autoClickers * prestigeMultiplier))}/s</p>
         </div>
-        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/30 rounded-xl p-3 backdrop-blur-sm">
+        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-purple-300 font-medium mb-1">Conversion Rate</p>
-          <p className="text-xl font-bold text-white">{((0.1 + (rebirths * 0.01)) * 100).toFixed(0)}%</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{((0.1 + (rebirths * 0.01)) * 100).toFixed(0)}%</p>
         </div>
-        <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border border-yellow-500/30 rounded-xl p-3 backdrop-blur-sm">
+        <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border border-yellow-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-yellow-300 font-medium mb-1">Crate Cost</p>
-          <p className="text-xl font-bold text-white">${abbreviateNumber(luckyCrateCost)}</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">${abbreviateNumber(luckyCrateCost)}</p>
         </div>
       </div>
 
