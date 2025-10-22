@@ -5,6 +5,7 @@ import NotificationModal from '../components/NotificationModal';
 import PopupModal from '../components/PopupModal';
 import SettingsModal from '../components/SettingsModal';
 import UpdateModal from '../components/UpdateModal';
+import BlackjackModal from '../components/BlackjackModal';
 import { checkForNewRelease, setLastSeenVersion } from '../utils/githubRelease';
 
 export default function Home() {
@@ -16,6 +17,12 @@ export default function Home() {
   const [rebirths, setRebirths] = useState(0);
   const [prestigeCurrency, setPrestigeCurrency] = useState(0);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showBlackjackModal, setShowBlackjackModal] = useState(false);
+  
+  // Settings state
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [theme, setTheme] = useState<'dark' | 'light' | 'blue'>('dark');
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
 
   const initialUpgrades = [
     { id: 'power', name: 'Increase Click Power', baseCost: 10, cost: 10, effect: () => setClickPower(prev => prev + 1), count: 0, description: 'Increases the number of clicks you get per click.' },
@@ -43,10 +50,15 @@ export default function Home() {
       rebirths,
       prestigeCurrency,
       upgrades,
+      settings: {
+        soundEnabled,
+        theme,
+        autoSaveEnabled,
+      },
     };
     localStorage.setItem('cookieClickerGame', JSON.stringify(gameState));
     setNotification({ message: 'Game Saved!', type: 'success' });
-  }, [clicks, cash, clickPower, autoClickers, luckyCrateCost, rebirths, prestigeCurrency, upgrades]);
+  }, [clicks, cash, clickPower, autoClickers, luckyCrateCost, rebirths, prestigeCurrency, upgrades, soundEnabled, theme, autoSaveEnabled]);
 
   const loadGame = useCallback(() => {
     const savedState = localStorage.getItem('cookieClickerGame');
@@ -59,6 +71,14 @@ export default function Home() {
       setLuckyCrateCost(gameState.luckyCrateCost);
       setRebirths(gameState.rebirths);
       setPrestigeCurrency(gameState.prestigeCurrency);
+      
+      // Load settings if they exist
+      if (gameState.settings) {
+        setSoundEnabled(gameState.settings.soundEnabled ?? true);
+        setTheme(gameState.settings.theme ?? 'dark');
+        setAutoSaveEnabled(gameState.settings.autoSaveEnabled ?? true);
+      }
+      
       // Re-assign effect functions to loaded upgrades
       const loadedUpgradesWithEffects = gameState.upgrades.map((loadedUpgrade: any) => {
         const initialUpgrade = initialUpgrades.find(iu => iu.id === loadedUpgrade.id);
@@ -74,6 +94,16 @@ export default function Home() {
   useEffect(() => {
     loadGame(); // Load game on component mount
   }, [loadGame]);
+
+  // Auto-save every 30 seconds if enabled
+  useEffect(() => {
+    if (autoSaveEnabled) {
+      const interval = setInterval(() => {
+        saveGame();
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [autoSaveEnabled, saveGame]);
 
   useEffect(() => {
     // Check for new releases
@@ -122,8 +152,20 @@ export default function Home() {
     setRebirths(0);
     setPrestigeCurrency(0);
     setUpgrades(initialUpgrades);
+    setSoundEnabled(true);
+    setTheme('dark');
+    setAutoSaveEnabled(true);
     setNotification({ message: 'Game progress reset!', type: 'success' });
     handleCloseSettings();
+  };
+
+  const handleBlackjackWin = (amount: number) => {
+    setCash(prevCash => prevCash + amount);
+    setNotification({ message: `Blackjack: Won $${amount}!`, type: 'success' });
+  };
+
+  const handleBlackjackLose = (amount: number) => {
+    setCash(prevCash => Math.max(0, prevCash - amount));
   };
 
   const handleCloseUpdateModal = () => {
@@ -133,8 +175,17 @@ export default function Home() {
     setShowUpdateModal(false);
   };
 
+  const canRebirth = cash >= 1000000; // User can rebirth if they have at least 1M cash
+
+  // Theme classes
+  const themeClasses = {
+    dark: 'bg-gray-900 text-white',
+    light: 'bg-gray-100 text-gray-900',
+    blue: 'bg-blue-900 text-white',
+  };
+
   return (
-    <div className="home-container">
+    <div className={`home-container ${themeClasses[theme]}`}>
       <TopBar
         onSaveGame={saveGame}
         onLoadGame={loadGame}
@@ -149,6 +200,7 @@ export default function Home() {
         cash={cash}
         rebirths={rebirths}
         prestigeCurrency={prestigeCurrency}
+        canRebirth={canRebirth}
       />
       <CookieClickerGame
         clicks={clicks}
@@ -172,6 +224,7 @@ export default function Home() {
         popup={popup}
         setPopup={setPopup}
         initialUpgrades={initialUpgrades}
+        onOpenCasino={() => setShowBlackjackModal(true)}
       />
       {notification && (
         <NotificationModal
@@ -194,6 +247,20 @@ export default function Home() {
         isOpen={showSettingsModal}
         onClose={handleCloseSettings}
         onResetSave={handleResetSave}
+        soundEnabled={soundEnabled}
+        onToggleSound={() => setSoundEnabled(!soundEnabled)}
+        theme={theme}
+        onChangeTheme={setTheme}
+        autoSaveEnabled={autoSaveEnabled}
+        onToggleAutoSave={() => setAutoSaveEnabled(!autoSaveEnabled)}
+      />
+
+      <BlackjackModal
+        isOpen={showBlackjackModal}
+        onClose={() => setShowBlackjackModal(false)}
+        cash={cash}
+        onWin={handleBlackjackWin}
+        onLose={handleBlackjackLose}
       />
 
       {showUpdateModal && updateInfo && (
