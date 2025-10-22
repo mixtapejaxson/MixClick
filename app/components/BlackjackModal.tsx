@@ -186,12 +186,8 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className={`bg-gradient-to-br from-green-800 via-green-700 to-emerald-900 text-white ${
-        isMobile 
-          ? 'p-4 mx-2 max-w-sm' 
-          : 'p-6 sm:p-8 max-w-3xl'
-      } w-full max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl border-4 border-yellow-500/30 relative`}>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4 md:p-6">
+      <div className="bg-gradient-to-br from-green-800 via-green-700 to-emerald-900 text-white p-4 sm:p-6 md:p-8 w-full max-h-[95vh] overflow-y-auto rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl border-4 border-yellow-500/30 relative">
         
         {/* Decorative Background Pattern */}
         <div className="absolute inset-0 opacity-5">
