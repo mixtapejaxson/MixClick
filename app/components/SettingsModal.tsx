@@ -57,46 +57,74 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
           
           {/* Sound Toggle */}
-          <div className="flex items-center justify-between p-2.5 sm:p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:shadow-md transition-all">
-            <label className="text-sm sm:text-base text-gray-800 font-medium">Sound Effects</label>
+          <div className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all shadow-sm hover:shadow-md">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-lg sm:text-xl">🔊</span>
+              <div>
+                <label className="text-sm sm:text-base text-gray-900 font-semibold block">Sound Effects</label>
+                <span className="text-xs text-gray-500">Enable audio feedback</span>
+              </div>
+            </div>
             <button
               onClick={onToggleSound}
-              className={`w-11 h-6 sm:w-14 sm:h-7 rounded-full transition-all duration-300 ${
-                soundEnabled ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'
-              } relative shadow-inner`}
+              className={`relative inline-flex h-6 w-11 sm:h-7 sm:w-14 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                soundEnabled 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 focus:ring-green-500 shadow-lg shadow-green-500/30' 
+                  : 'bg-gray-300 focus:ring-gray-400'
+              }`}
               aria-label="Toggle Sound Effects"
               aria-checked={soundEnabled}
               role="switch"
             >
               <span
-                className={`w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full absolute top-0.5 transition-all duration-300 shadow-lg ${
+                className={`inline-block h-5 w-5 sm:h-6 sm:w-6 transform rounded-full bg-white shadow-lg transition-all duration-300 ease-in-out ${
                   soundEnabled 
-                    ? 'translate-x-5 sm:translate-x-7' 
-                    : 'translate-x-0.5'
+                    ? 'translate-x-5 sm:translate-x-7 ring-2 ring-green-400' 
+                    : 'translate-x-0.5 ring-2 ring-gray-200'
                 }`}
-              />
+              >
+                {soundEnabled && (
+                  <span className="flex h-full w-full items-center justify-center text-[10px] sm:text-xs">
+                    ✓
+                  </span>
+                )}
+              </span>
             </button>
           </div>
 
           {/* Auto-Save Toggle */}
-          <div className="flex items-center justify-between p-2.5 sm:p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:shadow-md transition-all">
-            <label className="text-sm sm:text-base text-gray-800 font-medium">Auto-Save</label>
+          <div className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all shadow-sm hover:shadow-md">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-lg sm:text-xl">💾</span>
+              <div>
+                <label className="text-sm sm:text-base text-gray-900 font-semibold block">Auto-Save</label>
+                <span className="text-xs text-gray-500">Save every 30 seconds</span>
+              </div>
+            </div>
             <button
               onClick={onToggleAutoSave}
-              className={`w-11 h-6 sm:w-14 sm:h-7 rounded-full transition-all duration-300 ${
-                autoSaveEnabled ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'
-              } relative shadow-inner`}
+              className={`relative inline-flex h-6 w-11 sm:h-7 sm:w-14 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                autoSaveEnabled 
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 focus:ring-blue-500 shadow-lg shadow-blue-500/30' 
+                  : 'bg-gray-300 focus:ring-gray-400'
+              }`}
               aria-label="Toggle Auto-Save"
               aria-checked={autoSaveEnabled}
               role="switch"
             >
               <span
-                className={`w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full absolute top-0.5 transition-all duration-300 shadow-lg ${
+                className={`inline-block h-5 w-5 sm:h-6 sm:w-6 transform rounded-full bg-white shadow-lg transition-all duration-300 ease-in-out ${
                   autoSaveEnabled 
-                    ? 'translate-x-5 sm:translate-x-7' 
-                    : 'translate-x-0.5'
+                    ? 'translate-x-5 sm:translate-x-7 ring-2 ring-blue-400' 
+                    : 'translate-x-0.5 ring-2 ring-gray-200'
                 }`}
-              />
+              >
+                {autoSaveEnabled && (
+                  <span className="flex h-full w-full items-center justify-center text-[10px] sm:text-xs">
+                    ✓
+                  </span>
+                )}
+              </span>
             </button>
           </div>
 
