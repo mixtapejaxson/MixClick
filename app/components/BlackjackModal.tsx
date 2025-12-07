@@ -38,9 +38,14 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
     const newDeck: Card[] = [];
     suits.forEach(suit => {
       values.forEach(value => {
-        let numValue = parseInt(value);
-        if (value === 'A') numValue = 11;
-        else if (['J', 'Q', 'K'].includes(value)) numValue = 10;
+        let numValue: number;
+        if (value === 'A') {
+          numValue = 11;
+        } else if (['J', 'Q', 'K'].includes(value)) {
+          numValue = 10;
+        } else {
+          numValue = parseInt(value, 10);
+        }
         newDeck.push({ suit, value, numValue });
       });
     });
@@ -158,8 +163,19 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
 
     setGameState('gameOver');
     
+    // Check for blackjack (21 with exactly 2 cards)
+    const playerBlackjack = playerValue === 21 && finalPlayerHand.length === 2;
+    const dealerBlackjack = dealerValue === 21 && finalDealerHand.length === 2;
+    
     if (playerValue > 21) {
       setMessage(`Bust! You lose $${abbreviateNumber(bet)}`);
+      onLose(bet);
+    } else if (playerBlackjack && !dealerBlackjack) {
+      const winnings = Math.floor(bet * 1.5); // Blackjack pays 3:2
+      setMessage(`Blackjack! You win $${abbreviateNumber(winnings)}!`);
+      onWin(winnings);
+    } else if (dealerBlackjack && !playerBlackjack) {
+      setMessage(`Dealer has Blackjack! You lose $${abbreviateNumber(bet)}`);
       onLose(bet);
     } else if (dealerValue > 21) {
       setMessage(`Dealer busts! You win $${abbreviateNumber(bet)}`);
@@ -172,6 +188,7 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
       onLose(bet);
     } else {
       setMessage('Push! Bet returned.');
+      // No win or loss - bet is returned (no action needed)
     }
   };
 
