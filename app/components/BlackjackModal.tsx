@@ -171,7 +171,7 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
       setMessage(`Bust! You lose $${abbreviateNumber(bet)}`);
       onLose(bet);
     } else if (playerBlackjack && !dealerBlackjack) {
-      const winnings = Math.floor(bet * 1.5); // Blackjack pays 3:2
+      const winnings = Math.round(bet * 1.5); // Blackjack pays 3:2, round to nearest whole number
       setMessage(`Blackjack! You win $${abbreviateNumber(winnings)}!`);
       onWin(winnings);
     } else if (dealerBlackjack && !playerBlackjack) {
