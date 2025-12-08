@@ -129,21 +129,21 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
       onLose(bet);
       setGameState('gameOver');
     } else if (handValue === 21) {
-      stand();
+      stand(newPlayerHand);
     }
   };
 
-  const stand = () => {
+  const stand = (finalPlayerHand?: Card[]) => {
     if (gameState !== 'playing') return;
     setGameState('dealerTurn');
     setMessage('Dealer is playing...');
     
     setTimeout(() => {
-      dealerPlay();
+      dealerPlay(finalPlayerHand);
     }, 500);
   };
 
-  const dealerPlay = () => {
+  const dealerPlay = (finalPlayerHand?: Card[]) => {
     let newDealerHand = [...dealerHand];
     let newDeck = [...deck];
     
@@ -154,7 +154,7 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
     
     setDealerHand(newDealerHand);
     setDeck(newDeck);
-    endGame(playerHand, newDealerHand, newDeck);
+    endGame(finalPlayerHand || playerHand, newDealerHand, newDeck);
   };
 
   const endGame = (finalPlayerHand: Card[], finalDealerHand: Card[], remainingDeck: Card[]) => {
@@ -373,7 +373,7 @@ const BlackjackModal: React.FC<BlackjackModalProps> = ({
                 👍 Hit
               </button>
               <button
-                onClick={stand}
+                onClick={() => stand()}
                 className="px-4 sm:px-6 md:px-10 py-2.5 sm:py-3 md:py-4 text-sm sm:text-base md:text-lg lg:text-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-black rounded-xl sm:rounded-2xl hover:from-red-600 hover:to-red-700 transition-all shadow-2xl hover:shadow-red-500/50 transform hover:-translate-y-1 active:translate-y-0"
               >
                 🛑 Stand
