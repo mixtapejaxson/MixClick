@@ -38,6 +38,14 @@ interface CookieClickerGameProps {
   setPopup: Dispatch<SetStateAction<{ title: string; message: string; onConfirm: () => void; onCancel: () => void } | null>>;
   initialUpgrades: Upgrade[];
   onOpenCasino: () => void;
+  skillModifiers: {
+    clickPowerBonus: number;
+    autoClickerBonus: number;
+    conversionRateBonus: number;
+    luckyCrateDiscount: number;
+    skillPointGain: number;
+  };
+  onStatUpdate: (statName: keyof import('../components/StatisticsModal').Statistics, value: number) => void;
 }
 
 export default function CookieClickerGame({
@@ -45,7 +53,7 @@ export default function CookieClickerGame({
   autoClickers, setAutoClickers, luckyCrateCost, setLuckyCrateCost,
   rebirths, setRebirths, prestigeCurrency, setPrestigeCurrency,
   upgrades, setUpgrades, notification, setNotification, popup, setPopup,
-  initialUpgrades, onOpenCasino
+  initialUpgrades, onOpenCasino, skillModifiers, onStatUpdate
 }: CookieClickerGameProps) {
   const isMobile = useMobileDetection();
   const [showShopModal, setShowShopModal] = useState(false);
@@ -53,15 +61,23 @@ export default function CookieClickerGame({
   const handleCookieClick = () => {
     // Apply prestige multiplier: 1% bonus per prestige currency
     const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
-    const effectiveClickPower = Math.floor(clickPower * prestigeMultiplier);
+    // Apply skill modifiers
+    const skillMultiplier = 1 + skillModifiers.clickPowerBonus;
+    const effectiveClickPower = Math.floor(clickPower * prestigeMultiplier * skillMultiplier);
     setClicks(prevClicks => prevClicks + effectiveClickPower);
+    // Track statistics
+    onStatUpdate('totalClicks', effectiveClickPower);
     // Lucky crates are now purchased, not random on click
   };
 
   const convertClicksToCash = () => {
-    const conversionRate = 0.1 + (rebirths * 0.01); // Base 10% + 1% per rebirth
-    setCash(prevCash => prevCash + (clicks * conversionRate));
+    const baseConversionRate = 0.1 + (rebirths * 0.01); // Base 10% + 1% per rebirth
+    const conversionRate = baseConversionRate + skillModifiers.conversionRateBonus;
+    const cashGained = clicks * conversionRate;
+    setCash(prevCash => prevCash + cashGained);
     setClicks(0);
+    // Track statistics
+    onStatUpdate('totalCashEarned', cashGained);
   };
 
   const purchaseUpgrade = (upgradeId: string) => {
@@ -72,6 +88,8 @@ export default function CookieClickerGame({
             setCash(prevCash => Math.max(0, prevCash - upgrade.cost));
             upgrade.effect();
             setNotification({ message: `Purchased ${upgrade.name}!`, type: 'success' });
+            // Track statistics
+            onStatUpdate('totalUpgradesPurchased', 1);
             return { ...upgrade, count: upgrade.count + 1, cost: Math.round(upgrade.baseCost * Math.pow(1.15, upgrade.count + 1)) };
           } else {
             setNotification({ message: 'Not enough cash!', type: 'error' });
@@ -83,21 +101,27 @@ export default function CookieClickerGame({
     });
   };
 
-  // Auto clicker effect with prestige multiplier
+  // Auto clicker effect with prestige multiplier and skill bonuses
   useEffect(() => {
     const interval = setInterval(() => {
       // Apply prestige multiplier: 1% bonus per prestige currency
       const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
-      const effectiveAutoClickers = Math.floor(autoClickers * prestigeMultiplier);
+      // Apply skill modifiers
+      const skillMultiplier = 1 + skillModifiers.autoClickerBonus;
+      const effectiveAutoClickers = Math.floor(autoClickers * prestigeMultiplier * skillMultiplier);
       setClicks(prevClicks => prevClicks + effectiveAutoClickers);
     }, 1000);
     return () => clearInterval(interval);
-  }, [autoClickers, prestigeCurrency, setClicks]);
+  }, [autoClickers, prestigeCurrency, skillModifiers.autoClickerBonus, setClicks]);
 
   const purchaseLuckyCrate = () => {
-    if (cash >= luckyCrateCost) {
-      setCash(prevCash => Math.max(0, prevCash - luckyCrateCost));
+    // Apply skill discount
+    const discountedCost = Math.floor(luckyCrateCost * (1 - skillModifiers.luckyCrateDiscount));
+    if (cash >= discountedCost) {
+      setCash(prevCash => Math.max(0, prevCash - discountedCost));
       setLuckyCrateCost(prevCost => Math.round(prevCost * 1.2)); // Dynamic pricing
+      // Track statistics
+      onStatUpdate('totalLuckyCratesOpened', 1);
       triggerLuckyCrate();
     } else {
       setNotification({ message: 'Not enough cash to buy a Lucky Crate!', type: 'error' });
@@ -122,8 +146,11 @@ export default function CookieClickerGame({
     randomOutcome.effect();
   };
 
-  // Calculate prestige multiplier
+  // Calculate prestige and skill multipliers
   const prestigeMultiplier = 1 + (prestigeCurrency * 0.01);
+  const clickSkillMultiplier = 1 + skillModifiers.clickPowerBonus;
+  const autoClickerSkillMultiplier = 1 + skillModifiers.autoClickerBonus;
+  const effectiveLuckyCrateCost = Math.floor(luckyCrateCost * (1 - skillModifiers.luckyCrateDiscount));
 
   return (
     <div className="flex flex-col items-center justify-center flex-grow p-3 sm:p-6 md:p-8 min-h-screen" onContextMenu={(e) => e.preventDefault()}>
@@ -193,19 +220,19 @@ export default function CookieClickerGame({
       <div className="mt-6 sm:mt-8 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4 w-full max-w-xs sm:max-w-3xl px-2 sm:px-0">
         <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-blue-300 font-medium mb-1">Click Power</p>
-          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{abbreviateNumber(Math.floor(clickPower * prestigeMultiplier))}</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{abbreviateNumber(Math.floor(clickPower * prestigeMultiplier * clickSkillMultiplier))}</p>
         </div>
         <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-green-300 font-medium mb-1">Auto Clickers</p>
-          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{abbreviateNumber(Math.floor(autoClickers * prestigeMultiplier))}/s</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{abbreviateNumber(Math.floor(autoClickers * prestigeMultiplier * autoClickerSkillMultiplier))}/s</p>
         </div>
         <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-purple-300 font-medium mb-1">Conversion Rate</p>
-          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{((0.1 + (rebirths * 0.01)) * 100).toFixed(0)}%</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">{(((0.1 + (rebirths * 0.01)) + skillModifiers.conversionRateBonus) * 100).toFixed(0)}%</p>
         </div>
         <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border border-yellow-500/30 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
           <p className="text-xs text-yellow-300 font-medium mb-1">Crate Cost</p>
-          <p className="text-base sm:text-lg md:text-xl font-bold text-white">${abbreviateNumber(luckyCrateCost)}</p>
+          <p className="text-base sm:text-lg md:text-xl font-bold text-white">${abbreviateNumber(effectiveLuckyCrateCost)}</p>
         </div>
       </div>
 
@@ -221,7 +248,7 @@ export default function CookieClickerGame({
         cash={cash}
         upgrades={upgrades}
         onPurchaseUpgrade={purchaseUpgrade}
-        luckyCrateCost={luckyCrateCost}
+        luckyCrateCost={effectiveLuckyCrateCost}
         onPurchaseLuckyCrate={purchaseLuckyCrate}
       />
     </div>
