@@ -56,19 +56,19 @@ export default function Home() {
   // Skill tree initialization
   const createInitialSkills = (): Skill[] => [
     // Click Path
-    { id: 'click_power_1', name: 'Power Click I', description: '+5% click power', cost: 1, maxLevel: 5, currentLevel: 0, category: 'click', effect: (level) => setSkillModifiers(prev => ({ ...prev, clickPowerBonus: prev.clickPowerBonus + 0.05 })) },
-    { id: 'click_power_2', name: 'Power Click II', description: '+10% click power', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'click_power_1', category: 'click', effect: (level) => setSkillModifiers(prev => ({ ...prev, clickPowerBonus: prev.clickPowerBonus + 0.10 })) },
-    { id: 'click_critical', name: 'Critical Clicks', description: '+20% click power', cost: 3, maxLevel: 3, currentLevel: 0, prerequisite: 'click_power_2', category: 'click', effect: (level) => setSkillModifiers(prev => ({ ...prev, clickPowerBonus: prev.clickPowerBonus + 0.20 })) },
+    { id: 'click_power_1', name: 'Power Click I', description: '+5% click power per level', cost: 1, maxLevel: 5, currentLevel: 0, category: 'click', effect: () => setSkillModifiers(prev => ({ ...prev, clickPowerBonus: prev.clickPowerBonus + 0.05 })) },
+    { id: 'click_power_2', name: 'Power Click II', description: '+10% click power per level', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'click_power_1', category: 'click', effect: () => setSkillModifiers(prev => ({ ...prev, clickPowerBonus: prev.clickPowerBonus + 0.10 })) },
+    { id: 'click_critical', name: 'Critical Clicks', description: '+20% click power per level', cost: 3, maxLevel: 3, currentLevel: 0, prerequisite: 'click_power_2', category: 'click', effect: () => setSkillModifiers(prev => ({ ...prev, clickPowerBonus: prev.clickPowerBonus + 0.20 })) },
     
     // Idle Path
-    { id: 'idle_boost_1', name: 'Idle Boost I', description: '+5% auto clicker efficiency', cost: 1, maxLevel: 5, currentLevel: 0, category: 'idle', effect: (level) => setSkillModifiers(prev => ({ ...prev, autoClickerBonus: prev.autoClickerBonus + 0.05 })) },
-    { id: 'idle_boost_2', name: 'Idle Boost II', description: '+10% auto clicker efficiency', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'idle_boost_1', category: 'idle', effect: (level) => setSkillModifiers(prev => ({ ...prev, autoClickerBonus: prev.autoClickerBonus + 0.10 })) },
-    { id: 'idle_master', name: 'Idle Master', description: '+25% auto clicker efficiency', cost: 3, maxLevel: 3, currentLevel: 0, prerequisite: 'idle_boost_2', category: 'idle', effect: (level) => setSkillModifiers(prev => ({ ...prev, autoClickerBonus: prev.autoClickerBonus + 0.25 })) },
+    { id: 'idle_boost_1', name: 'Idle Boost I', description: '+5% auto clicker efficiency per level', cost: 1, maxLevel: 5, currentLevel: 0, category: 'idle', effect: () => setSkillModifiers(prev => ({ ...prev, autoClickerBonus: prev.autoClickerBonus + 0.05 })) },
+    { id: 'idle_boost_2', name: 'Idle Boost II', description: '+10% auto clicker efficiency per level', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'idle_boost_1', category: 'idle', effect: () => setSkillModifiers(prev => ({ ...prev, autoClickerBonus: prev.autoClickerBonus + 0.10 })) },
+    { id: 'idle_master', name: 'Idle Master', description: '+25% auto clicker efficiency per level', cost: 3, maxLevel: 3, currentLevel: 0, prerequisite: 'idle_boost_2', category: 'idle', effect: () => setSkillModifiers(prev => ({ ...prev, autoClickerBonus: prev.autoClickerBonus + 0.25 })) },
     
     // Economy Path
-    { id: 'economy_1', name: 'Better Deals I', description: '+2% conversion rate', cost: 1, maxLevel: 5, currentLevel: 0, category: 'economy', effect: (level) => setSkillModifiers(prev => ({ ...prev, conversionRateBonus: prev.conversionRateBonus + 0.02 })) },
-    { id: 'economy_2', name: 'Better Deals II', description: '+5% conversion rate', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'economy_1', category: 'economy', effect: (level) => setSkillModifiers(prev => ({ ...prev, conversionRateBonus: prev.conversionRateBonus + 0.05 })) },
-    { id: 'lucky_discount', name: 'Lucky Bargain', description: '-10% lucky crate cost', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'economy_1', category: 'economy', effect: (level) => setSkillModifiers(prev => ({ ...prev, luckyCrateDiscount: prev.luckyCrateDiscount + 0.10 })) },
+    { id: 'economy_1', name: 'Better Deals I', description: '+2% conversion rate per level', cost: 1, maxLevel: 5, currentLevel: 0, category: 'economy', effect: () => setSkillModifiers(prev => ({ ...prev, conversionRateBonus: prev.conversionRateBonus + 0.02 })) },
+    { id: 'economy_2', name: 'Better Deals II', description: '+5% conversion rate per level', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'economy_1', category: 'economy', effect: () => setSkillModifiers(prev => ({ ...prev, conversionRateBonus: prev.conversionRateBonus + 0.05 })) },
+    { id: 'lucky_discount', name: 'Lucky Bargain', description: '-10% lucky crate cost per level', cost: 2, maxLevel: 5, currentLevel: 0, prerequisite: 'economy_1', category: 'economy', effect: () => setSkillModifiers(prev => ({ ...prev, luckyCrateDiscount: prev.luckyCrateDiscount + 0.10 })) },
   ];
 
   const [skills, setSkills] = useState<Skill[]>(createInitialSkills());
@@ -293,7 +293,7 @@ export default function Home() {
             
             if (canUnlock) {
               setSkillPoints(prev => prev - skill.cost);
-              skill.effect(skill.currentLevel + 1);
+              skill.effect();
               setNotification({ message: `Unlocked ${skill.name}!`, type: 'success' });
               return { ...skill, currentLevel: skill.currentLevel + 1 };
             } else {

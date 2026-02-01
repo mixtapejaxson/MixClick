@@ -11,7 +11,7 @@ export interface Skill {
   currentLevel: number;
   prerequisite?: string; // ID of skill that must be unlocked first
   category: 'click' | 'idle' | 'economy';
-  effect: (level: number) => void;
+  effect: () => void;
 }
 
 interface SkillTreeModalProps {
@@ -92,7 +92,7 @@ const SkillTreeModal: React.FC<SkillTreeModalProps> = ({
             {categories.map(category => {
               const categorySkills = skills.filter(s => s.category === category);
               return (
-                <div key={category} className={`bg-gradient-to-br ${categoryColors[category]}/10 ${isMobile ? 'p-4' : 'p-6'} rounded-2xl shadow-2xl border-2 border-${category === 'click' ? 'red' : category === 'idle' ? 'blue' : 'green'}-500/50 backdrop-blur-sm`}>
+                <div key={category} className={`bg-gradient-to-br ${categoryColors[category]}/10 ${isMobile ? 'p-4' : 'p-6'} rounded-2xl shadow-2xl border-2 ${category === 'click' ? 'border-red-500/50' : category === 'idle' ? 'border-blue-500/50' : 'border-green-500/50'} backdrop-blur-sm`}>
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-10 h-10 bg-gradient-to-br ${categoryColors[category]} rounded-xl flex items-center justify-center`}>
                       <span className="text-xl">{categoryIcons[category]}</span>

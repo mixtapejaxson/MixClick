@@ -77,11 +77,22 @@ const StatisticsModal: React.FC<StatisticsModalProps> = ({
         {/* Content Container */}
         <div className="overflow-y-auto h-full pb-20">
           <div className={`${isMobile ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'}`}>
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className={`bg-gradient-to-br ${stat.color}/10 border-2 border-${stat.color.split('-')[1]}-500/30 ${isMobile ? 'p-4' : 'p-5'} rounded-2xl shadow-lg backdrop-blur-sm hover:border-${stat.color.split('-')[1]}-500/60 transition-all`}
-              >
+            {stats.map((stat, index) => {
+              const borderColor = stat.color.includes('red') ? 'border-red-500/30 hover:border-red-500/60' :
+                                 stat.color.includes('green') ? 'border-green-500/30 hover:border-green-500/60' :
+                                 stat.color.includes('blue') ? 'border-blue-500/30 hover:border-blue-500/60' :
+                                 stat.color.includes('yellow') ? 'border-yellow-500/30 hover:border-yellow-500/60' :
+                                 stat.color.includes('purple') ? 'border-purple-500/30 hover:border-purple-500/60' :
+                                 stat.color.includes('indigo') ? 'border-indigo-500/30 hover:border-indigo-500/60' :
+                                 stat.color.includes('emerald') ? 'border-emerald-500/30 hover:border-emerald-500/60' :
+                                 stat.color.includes('amber') ? 'border-amber-500/30 hover:border-amber-500/60' :
+                                 'border-cyan-500/30 hover:border-cyan-500/60';
+              
+              return (
+                <div
+                  key={index}
+                  className={`bg-gradient-to-br ${stat.color}/10 border-2 ${borderColor} ${isMobile ? 'p-4' : 'p-5'} rounded-2xl shadow-lg backdrop-blur-sm transition-all`}
+                >
                 <div className="flex items-center gap-3 mb-2">
                   <div className={`w-10 h-10 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center`}>
                     <span className="text-xl">{stat.icon}</span>
@@ -94,7 +105,8 @@ const StatisticsModal: React.FC<StatisticsModalProps> = ({
                   {stat.value}
                 </p>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
